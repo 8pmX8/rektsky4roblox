@@ -149,6 +149,10 @@ if isfolder("rektsky/sound") == false then
     makefolder("rektsky/sound")
 end
 
+if isfolder("rektsky/sound/mc") == false then
+    makefolder("rektsky/sound/mc")
+end
+
 if isfolder("rektsky/assets") == false then
     makefolder("rektsky/assets")
 end
