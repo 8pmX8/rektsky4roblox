@@ -1,6 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
-local lib = loadstring(readfile("rektsky/NewRektskyUiLib.lua"))()
+local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
 
 local spawn = function(func) 
     return coroutine.wrap(func)()
