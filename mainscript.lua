@@ -9,6 +9,8 @@ if game.PlaceId == 6872274481 or game.PlaceId == 8560631822 or game.PlaceId == 8
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/scripts/bedwars.lua"))()
 elseif game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/scripts/"..game.PlaceId..".lua") then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/scripts/"..game.PlaceId..".lua"))()
-else
+elseif isfile("rektsky/scripts/"..game.PlaceId..".lua") then
+    loadstring(readfile("rektsky/scripts/"..game.PlaceId..".lua"))()
+else    
     loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/scripts/AnyGame.lua"))()
 end
