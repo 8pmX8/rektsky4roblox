@@ -1,6 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
-local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
+local lib = loadstring(readfile("rektsky/NewRektskyUiLib.lua"))()
 
 local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
 
@@ -1271,7 +1271,7 @@ local function getcustomassetfunc(path)
             textlabel:Remove()
         end)
         local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/assets", "assets"),
+            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/sound/mc", "sound/mc"),
             Method = "GET"
         })
         writefile(path, req.Body)
@@ -1280,6 +1280,35 @@ local function getcustomassetfunc(path)
         cachedassets[path] = getasset(path) 
     end
     return cachedassets[path]
+end
+
+local cachedassetssds = {}
+local function getcustomassetthingylol(path)
+    if not betterisfile(path) then
+        spawn(function()
+            local textlabel = Instance.new("TextLabel")
+            textlabel.Size = UDim2.new(1, 0, 0, 36)
+            textlabel.Text = "Downloading "..path
+            textlabel.BackgroundTransparency = 1
+            textlabel.TextStrokeTransparency = 0
+            textlabel.TextSize = 30
+            textlabel.Font = Enum.Font.SourceSans
+            textlabel.TextColor3 = Color3.new(1, 1, 1)
+            textlabel.Position = UDim2.new(0, 0, 0, -36)
+            textlabel.Parent = ScreenGuitwo
+            repeat wait() until betterisfile(path)
+            textlabel:Remove()
+        end)
+        local req = requestfunc({
+            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/assets", "assets"),
+            Method = "GET"
+        })
+        writefile(path, req.Body)
+    end
+    if cachedassetssds[path] == nil then
+        cachedassetssds[path] = getasset(path) 
+    end
+    return cachedassetssds[path]
 end
 
 local gamesound = require(game:GetService("ReplicatedStorage").TS.sound["game-sound"]).GameSound
@@ -1394,7 +1423,7 @@ Tabs["Render"]:CreateToggle({
     ["Keybind"] = nil,
     ["Callback"] = function(v)
         if v and entity.isAlive then
-            Cape(game.Players.LocalPlayer.Character, getasset("rektsky/cape.png"))
+            Cape(game.Players.LocalPlayer.Character, getcustomassetthingylol("rektsky/cape.png"))
         else
             Cape(game.Players.LocalPlayer.Character, nil)
         end
@@ -1408,7 +1437,7 @@ local function makeRainbowText(text)
         local x = 0
         while wait() do
             colorbox = Color3.fromHSV(x,1,1)
-            x = x + 0.5/255
+            x = x + 10/255
             if x >= 1 then
                 x = 0
             end
@@ -1497,13 +1526,14 @@ Tabs["Render"]:CreateToggle({
     end
 })
 
+local screngiu
 Tabs["Render"]:CreateToggle({
     ["Name"] = "WaterMarks",
     ["Keybind"] = nil,
     ["Callback"] = function(v)
         if entity.isAlive then
             if v then
-                local screngiu = Instance.new("ScreenGui")
+                screngiu = Instance.new("ScreenGui")
                 local Frame = Instance.new("Frame")
                 local UICorner = Instance.new("UICorner")
                 local ImageLabel = Instance.new("ImageLabel")
@@ -1522,7 +1552,7 @@ Tabs["Render"]:CreateToggle({
                 ImageLabel.BackgroundTransparency = 1.000
                 ImageLabel.Position = UDim2.new(0.137143791, 0, 0.0700296983, 0)
                 ImageLabel.Size = UDim2.new(0, 108, 0, 108)
-                ImageLabel.Image = getasset("rektsky/assets/icon.png")
+                ImageLabel.Image = getcustomassetthingylol("rektsky/assets/icon.png")
                 TextLabel.Parent = Frame
                 TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 TextLabel.BackgroundTransparency = 1.000
@@ -1534,7 +1564,7 @@ Tabs["Render"]:CreateToggle({
                 TextLabel.TextScaled = true
                 TextLabel.TextSize = 14.000
                 TextLabel.TextWrapped = true
-                TextLabel.Text = "RektSky B4 Private"
+                TextLabel.Text = "RektSky B4 Public"
                 makeRainbowText(TextLabel, true)
             else
                 makeRainbowText(TextLabel, false)
@@ -1917,17 +1947,25 @@ Tabs["Exploits"]:CreateToggle({
 local shopthingyshopshop = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.games.bedwars.shop["bedwars-shop"]).BedwarsShop.getShopItem, 2)
 local oldnexttier
 local oldtiered
+local bypassstpidshoptiers = false
 Tabs["Exploits"]:CreateToggle({
     ["Name"] = "BypassShopTiers",
     ["Keybind"] = nil,
     ["Callback"] = function(v)
-        for i,v in pairs(shopthingyshopshop) do
-            oldtiered = oldtiered or v.tiered
-            oldnexttier = oldnexttier or v.nextTier
-        end
-        for i,v in pairs(shopthingyshopshop) do
-            v.tiered = nil
-            v.nextTier = nil
+        if (bypassstpidshoptiers) then
+            for i,v in pairs(shopthingyshopshop) do
+                oldtiered = oldtiered or v.tiered
+                oldnexttier = oldnexttier or v.nextTier
+            end
+            for i,v in pairs(shopthingyshopshop) do
+                v.tiered = nil
+                v.nextTier = nil
+            end
+        else
+            for i,v in pairs(shopthingyshopshop) do
+                v.tiered = oldtiered
+                v.nextTier = oldnexttier
+            end
         end
     end
 })
@@ -2052,12 +2090,14 @@ Tabs["Player"]:CreateToggle({
 
 function stealcheststrollage()
     for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
-        if v.Name == "chest" and v:FindFirstChild("ChestFolderValue") then
-            local mag = (char.PrimaryPart.Position - v.Position).Magnitude
-            if mag <= 45 then
-                for k,b in pairs(v.ChestFolderValue.Value:GetChildren()) do
-                    if b.Name ~= "ChestOwner" then
-                        game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged["Inventory:ChestGetItem"]:InvokeServer(v.ChestFolderValue.Value,b)
+        if v.Name == "chest" then
+            if v:FindFirstChild("ChestFolderValue") then
+                local mag = (hrp.Position - v.Position).Magnitude
+                if mag <= 45 then
+                    for k,b in pairs(v.ChestFolderValue.Value:GetChildren()) do
+                        if b.Name ~= "ChestOwner" then
+                            game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged["Inventory:ChestGetItem"]:InvokeServer(v.ChestFolderValue.Value,b)
+                        end
                     end
                 end
             end
@@ -2330,7 +2370,7 @@ Tabs["World"]:CreateToggle({
                 repeat
                     wait()
                     if entity.isAlive then
-                        wait(0.23)
+                        wait(0.25)
                         if (not bedrekterval) then return end
                         nuker()
                     end
