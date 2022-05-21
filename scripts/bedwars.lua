@@ -201,12 +201,30 @@ local function playanimation(id)
     end
 end
 
+local funnyanim = {
+    {CFrame = CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.10},
+    {CFrame = CFrame.new(0.5, -0.51, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.08},
+    {CFrame = CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.08}
+}
+
+local autoblockanim = {
+    {CFrame = CFrame.new(-0.01, -0.01, -1.01) * CFrame.Angles(math.rad(-90), math.rad(90), math.rad(0)), Time = 0.08},
+    {CFrame = CFrame.new(-0.01, -0.01, -1.01) * CFrame.Angles(math.rad(10), math.rad(70), math.rad(-90)), Time = 0.08},
+}
+
+local theotherfunnyanim = {
+    {CFrame = CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.5},
+    {CFrame = CFrame.new(-1.8, -0.21, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.05}
+}
+
+local rgfejd = false
 function KillauraRemote()
     for i,v in pairs(game.Players:GetChildren()) do
         if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
             local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
             if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
                 if v.Character.Humanoid.Health > 0 then
+                    rgfejd = true
                     local GBW = getsword()
                     local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
                     local Entity = v.Character
@@ -233,6 +251,8 @@ function KillauraRemote()
                         playanimation("rbxassetid://4947108314")
                     end
                 end
+            else
+                rgfejd = false
             end
         end
     end 
@@ -274,40 +294,9 @@ local function GetAllNearestHumanoidToPosition(distance, amount)
     return returnedplayer -- table of attackable entities
 end
 
+local germanthingy = false
 function funianimthing()
-    local plrthinglopl = GetAllNearestHumanoidToPosition(DistVal["Value"], 1)
-    if plrthinglopl then
-        for i,v in pairs(plrthinglopl) do
-            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                if v.Team ~= tostring(lplr.Team) then
-                    spawn(function()
-                        if killaurafirstpersonanim["Value"] then
-                            if origC0 == nil then
-                                origC0 = cam.Viewmodel.RightHand.RightWrist.C0
-                            end
-                            if killauraanimval["Value"] == "Cool" then
-                                if entity.isAlive then
-                                    coolanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {C0 = origC0 * CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(0, 1.8, 0)})
-                                    coolanim:Play()
-                                    coolanim.Completed:Wait()
-                                    coolanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.15, Enum.EasingStyle.Linear), {C0 = origC0 * CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(0, 1 / 5000, 0)})
-                                    coolanim:Play()
-                                end
-                            elseif killauraanimval["Value"] == "Thing" then
-                                if entity.isAlive then
-                                    coolanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {C0 = origC0 * CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(3.2, 3.5, 5)})
-                                    coolanim:Play()
-                                    coolanim.Completed:Wait()
-                                    coolanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.08, Enum.EasingStyle.Linear), {C0 = origC0 * CFrame.new(0.7, -0.7, 0.6) * CFrame.Angles(3, 1 / 5000, 3.5)})
-                                    coolanim:Play()
-                                end
-                            end
-                        end
-                    end)
-                end
-            end
-        end
-    end
+    
 end
 
 local isclone = false
@@ -407,6 +396,8 @@ local function getwool()
 	return nil
 end
 
+repeat task.wait() until (game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]:FindFirstChild("@flamework"))
+
 local BlockController2 = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.client.placement["block-placer"]).BlockPlacer
 local blockcontroller = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out).BlockEngine
 local BlockEngine = require(lplr.PlayerScripts.TS.lib["block-engine"]["client-block-engine"]).ClientBlockEngine
@@ -436,38 +427,71 @@ local Tabs = {
 do
     local oldbs
     local conectionkillaura
+    local animspeed = {["Value"] = 0.3}
+    local origC0 = game.ReplicatedStorage.Assets.Viewmodel.RightHand.RightWrist.C0
     local katog = Tabs["Combat"]:CreateToggle({
         ["Name"] = "KillAura",
         ["Keybind"] = nil,
         ["Callback"] = function(v)
             local kauraval = v
+            repeat task.wait() until (matchState == 1)
             spawn(function()
-                if kauraval and entity.isAlive then
-                    conectionkillaura = RunService.RenderStepped:Connect(function(step)
-                        if not kauraval then 
-                            return
-                        end
+                if (kauraval) then
+                    repeat
+                        task.wait()
+                        if (not kauraval) then break end
                         if entity.isAlive then
                             KillauraRemote()
                         end
-                    end)
+                    until (not kauraval)
                 else
-                    conectionkillaura:Disconnect()
                     return
                 end
             end)
             spawn(function()
                 repeat
-                    wait()
-                    if entity.isAlive then
+                    if (not kauraval) then return end
+                    task.wait(animspeed["Value"])
+                    local plrthinglopl = GetAllNearestHumanoidToPosition(DistVal["Value"], 1)
+                    if plrthinglopl then
+                        for i,v in pairs(plrthinglopl) do
+                            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
+                                if v.Team ~= tostring(lplr.Team) then
+                                    if killaurafirstpersonanim["Value"] then
+                                        if killauraanimval["Value"] == "Cool" then
+                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                for i, v in pairs(autoblockanim) do
+                                                    coolanimlol = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                    coolanimlol:Play()
+                                                    task.wait(v.Time - 0.01)
+                                                end
+                                            end
+                                        elseif killauraanimval["Value"] == "German" then
+                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                for i, v in pairs(funnyanim) do
+                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                    killauracurrentanim:Play()
+                                                    task.wait(v.Time - 0.01)
+                                                end
+                                            end
+                                        elseif killauraanimval["Value"] == "Penis" then
+                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                for i, v in pairs(theotherfunnyanim) do
+                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                    killauracurrentanim:Play()
+                                                    task.wait(v.Time - 0.01)
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
                         if killauraanimval["Value"] == "Cool" then
-                            task.wait(0.30)
-                            if (not kauraval) then return end
-                            funianimthing()
-                        elseif killauraanimval["Value"] == "Thing" then
-                            task.wait(0.16)
-                            if (not kauraval) then return end
-                            funianimthing()
+                            if (not rgfejd) then
+                                newthingy = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0})
+                                newthingy:Play()
+                            end
                         end
                     end
                 until (not kauraval)
@@ -504,9 +528,25 @@ do
     })
     killauraanimval = katog:CreateDropDown({
         ["Name"] = "AnimMode",
-        ["Function"] = function() end,
-        ["List"] = {"Cool", "Thing"},
+        ["Function"] = function(val)
+            if val == "German" then
+                zdsqzd = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56))})
+                zdsqzd:Play()
+            elseif val == "Penis" then
+                cock = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90))})
+                cock:Play()
+            end
+        end,
+        ["List"] = {"Cool", "German", "Penis"},
         ["Default"] = "Cool"
+    })
+    animspeed = katog:CreateSlider({
+        ["Name"] = "AnimationSpeed",
+        ["Function"] = function() end,
+        ["Min"] = 0.1,
+        ["Max"] = 0.5,
+        ["Default"] = 0.3,
+        ["Round"] = 1
     })
 end
 
@@ -1054,170 +1094,178 @@ do
     })
 end
 
-local customlongjumpval = false
-Tabs["Movement"]:CreateToggle({
-    ["Name"] = "CustomLongJump",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        customlongjumpval = v
-        if customlongjumpval then
-            spawn(function()
-                repeat
-                    if (not customlongjumpval) then return end
-                    task.wait()
-                    if lplr.Character.Humanoid.Jump == true then
-                        if (not customlongjumpval) then return end
-                        lplr.Character.Humanoid.WalkSpeed = 15
-                        Workspace.Gravity = 23
-                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.2,-2.1) 
-                        wait(0.1)
-                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.5,-2.1) 
-                        wait(0.1)
-                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0.2 ,0) 
-                        wait(0.1)
-                    end
-                until (not customlongjumpval)                
-            end)
-            spawn(function()
-                repeat
-                    if (not customlongjumpval) then return end
-                    lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                    wait()
-                    lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                    wait()
-                    lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
-                    wait()
-                until (not customlongjumpval)
-            end)
-        else
-            workspace.Gravity = 196.19999694824
-            return
-        end
-    end
-})
-
---[[local cloneval = false
-local funiclonegodmodedisab
-funiclonegodmodedisab = Tabs["Movement"]:CreateToggle({
-    ["Name"] = "CloneGodmodeFullDisabler",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        cloneval = v
-        if cloneval then
-            spawn(function()
-                isclone = true
-                clonemake()
-                speedd = 200
-                connectionnnn = game:GetService("RunService").Heartbeat:connect(function()
-                    local velo = clone.Humanoid.MoveDirection * speedd
-                    clone.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                end)
-            end)
-            repeat task.wait() until (matchState == 2)
-            funiclonegodmodedisab:Toggle()
-        else
-            clone:remove()
-            lplr.Character = realchar
-            realchar.Humanoid:ChangeState("Dead")
-            isclone = false
-            connectionnnn:Disconnect()
-            return
-        end
-    end
-})--]]
-
-longjumpfuni = Tabs["Movement"]:CreateToggle({
-    ["Name"] = "CannonLongJump",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        longjumpval = v
-        if longjumpval then
-            if game.Workspace.Map.Blocks:FindFirstChild("cannon") then
+--[[
+    local customlongjumpval = false
+    Tabs["Movement"]:CreateToggle({
+        ["Name"] = "CustomLongJump",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            customlongjumpval = v
+            if customlongjumpval then
                 spawn(function()
                     repeat
-                        for i,v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
-                            if v.Name == "cannon" then
-                                workspace.Gravity = 0
-                                v.LaunchSelfPrompt.HoldDuration = 0
-                                workspace.Gravity = 0
-                                fireproximityprompt(v.LaunchSelfPrompt)
-                                workspace.Gravity = 0
+                        if (not customlongjumpval) then return end
+                        task.wait()
+                        if lplr.Character.Humanoid.Jump == true then
+                            if (not customlongjumpval) then return end
+                            lplr.Character.Humanoid.WalkSpeed = 15
+                            Workspace.Gravity = 23
+                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.2,-2.1) 
+                            wait(0.1)
+                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.5,-2.1) 
+                            wait(0.1)
+                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0.2 ,0) 
+                            wait(0.1)
+                        end
+                    until (not customlongjumpval)                
+                end)
+                spawn(function()
+                    repeat
+                        if (not customlongjumpval) then return end
+                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                        wait()
+                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                        wait()
+                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+                        wait()
+                    until (not customlongjumpval)
+                end)
+            else
+                workspace.Gravity = 196.19999694824
+                return
+            end
+        end
+    })
+]]
+
+--[[
+    local cloneval = false
+    local funiclonegodmodedisab
+    funiclonegodmodedisab = Tabs["Movement"]:CreateToggle({
+        ["Name"] = "CloneGodmodeFullDisabler",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            cloneval = v
+            if cloneval then
+                spawn(function()
+                    isclone = true
+                    clonemake()
+                    speedd = 200
+                    connectionnnn = game:GetService("RunService").Heartbeat:connect(function()
+                        local velo = clone.Humanoid.MoveDirection * speedd
+                        clone.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
+                    end)
+                end)
+                repeat task.wait() until (matchState == 2)
+                funiclonegodmodedisab:Toggle()
+            else
+                clone:remove()
+                lplr.Character = realchar
+                realchar.Humanoid:ChangeState("Dead")
+                isclone = false
+                connectionnnn:Disconnect()
+                return
+            end
+        end
+    })
+--]]
+
+--[[
+    longjumpfuni = Tabs["Movement"]:CreateToggle({
+        ["Name"] = "CannonLongJump",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            longjumpval = v
+            if longjumpval then
+                if game.Workspace.Map.Blocks:FindFirstChild("cannon") then
+                    spawn(function()
+                        repeat
+                            for i,v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
+                                if v.Name == "cannon" then
+                                    workspace.Gravity = 0
+                                    v.LaunchSelfPrompt.HoldDuration = 0
+                                    workspace.Gravity = 0
+                                    fireproximityprompt(v.LaunchSelfPrompt)
+                                    workspace.Gravity = 0
+                                end
+                            end
+                        wait()
+                        until (not longjumpval)   
+                    end)
+                    spawn(function()
+                        workspace.Gravity = 0
+                        wait(0.1)
+                        workspace.Gravity = 0
+                        wait(0.1)
+                        workspace.Gravity = 0
+                        wait(0.1)
+                        workspace.Gravity = 0
+                        wait(0.62)
+                        workspace.Gravity = 196.19999694824
+                    end)
+                    spawn(function()
+                        for i = 1, 4 do
+                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                            wait(0.1)
+                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                        end
+                    end)
+                    longjumpfuni:silentToggle()
+                end
+            else
+                workspace.Gravity = 196.19999694824
+                return
+            end
+        end
+    })
+]]
+
+--[[
+    local flyenabled
+    Tabs["Movement"]:CreateToggle({
+        ["Name"] = "Fly",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            flyenabled = v
+            if flyenabled then
+                spawn(function()
+                    repeat
+                        task.wait()
+                        if clone then
+                            task.wait()
+                            workspace.Gravity = 1
+                            local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
+                            local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
+                            if SpaceHeld then
+                                clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0)
+                                task.wait()
+                            end
+                            if ShiftHeld then
+                                clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, -15, 0)
+                                task.wait()
+                            end
+                        else
+                            task.wait()
+                            workspace.Gravity = 1
+                            local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
+                            local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
+                            if SpaceHeld then
+                                hrp.CFrame = hrp.CFrame * CFrame.new(0, 15, 0)
+                                task.wait()
+                            end
+                            if ShiftHeld then
+                                hrp.CFrame = hrp.CFrame * CFrame.new(0, -15, 0)
+                                task.wait()
                             end
                         end
-                    wait()
-                    until (not longjumpval)   
+                    until (not flyenabled)
                 end)
-                spawn(function()
-                    workspace.Gravity = 0
-                    wait(0.1)
-                    workspace.Gravity = 0
-                    wait(0.1)
-                    workspace.Gravity = 0
-                    wait(0.1)
-                    workspace.Gravity = 0
-                    wait(0.62)
-                    workspace.Gravity = 196.19999694824
-                end)
-                spawn(function()
-                    for i = 1, 4 do
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                        wait(0.1)
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                    end
-                end)
-                longjumpfuni:silentToggle()
+            else
+                conectthingylol:Disconnect()
             end
-        else
-            workspace.Gravity = 196.19999694824
-            return
         end
-    end
-})
-
-local flyenabled
-Tabs["Movement"]:CreateToggle({
-    ["Name"] = "Fly",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        flyenabled = v
-        if flyenabled then
-			spawn(function()
-                repeat
-                    task.wait()
-                    if clone then
-                        task.wait()
-                        workspace.Gravity = 1
-                        local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
-                        local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
-                        if SpaceHeld then
-                            clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0)
-                            task.wait()
-                        end
-                        if ShiftHeld then
-                            clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, -15, 0)
-                            task.wait()
-                        end
-                    else
-                        task.wait()
-                        workspace.Gravity = 1
-                        local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
-                        local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
-                        if SpaceHeld then
-                            hrp.CFrame = hrp.CFrame * CFrame.new(0, 15, 0)
-                            task.wait()
-                        end
-                        if ShiftHeld then
-                            hrp.CFrame = hrp.CFrame * CFrame.new(0, -15, 0)
-                            task.wait()
-                        end
-                    end
-                until (not flyenabled)
-            end)
-        else
-            conectthingylol:Disconnect()
-        end
-    end
-})
+    })
+]]
 
 -- RENDER
 
@@ -1437,7 +1485,7 @@ local function makeRainbowText(text)
         local x = 0
         while wait() do
             colorbox = Color3.fromHSV(x,1,1)
-            x = x + 10/255
+            x = x + 4.5/255
             if x >= 1 then
                 x = 0
             end
@@ -2126,7 +2174,7 @@ Tabs["Rektsky"]:CreateToggle({
     ["Keybind"] = nil,
     ["Callback"] = function(v)
         spammer = v
-        if v then
+        if spammer then
             spawn(function()
                 repeat
                     if (not spammer) then return end
@@ -2137,6 +2185,34 @@ Tabs["Rektsky"]:CreateToggle({
         end
     end
 })
+
+--[[
+    do
+        local rainbowenab = {["Value"] = false}
+        local rainbowspeed = {["Value"] = 4.5}
+        local clcickgui = Tabs["Rektsky"]:CreateToggle({
+            ["Name"] = "ClickGui",
+            ["Keybind"] = nil,
+            ["Callback"] = function(v) end
+        })
+
+        clcickgui:CreateOptionTog({
+            ["Name"] = "Rainbow",
+            ["Func"] = function(val) 
+                lib["Rainbow"] = val 
+            end
+        })
+
+        clcickgui:CreateSlider({
+            ["Name"] = "RainbowSpeed",
+            ["Function"] = function() end,
+            ["Min"] = 1,
+            ["Max"] = 20,
+            ["Default"] = 4.5,
+            ["Round"] = 1
+        })
+    end
+]]
 
 --[[
 Tabs["Rektsky"]:CreateToggle({
