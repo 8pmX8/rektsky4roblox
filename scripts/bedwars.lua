@@ -213,8 +213,13 @@ local autoblockanim = {
 }
 
 local theotherfunnyanim = {
-    {CFrame = CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.5},
+    {CFrame = CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.05},
     {CFrame = CFrame.new(-1.8, -0.21, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.05}
+}
+
+local kmsanim = {
+    {CFrame = CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.1},
+    {CFrame = CFrame.new(-2.5, -1, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.05}
 }
 
 local rgfejd = false
@@ -482,6 +487,14 @@ do
                                                     task.wait(v.Time - 0.01)
                                                 end
                                             end
+                                        elseif killauraanimval["Value"] == "KillMyself" then
+                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                for i, v in pairs(kmsanim) do
+                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                    killauracurrentanim:Play()
+                                                    task.wait(v.Time - 0.01)
+                                                end
+                                            end
                                         end
                                     end
                                 end
@@ -491,6 +504,12 @@ do
                             if (not rgfejd) then
                                 newthingy = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0})
                                 newthingy:Play()
+                            end
+                        end
+                        if killauraanimval["Value"] == "KillMyself" then
+                            if (not rgfejd) then
+                                sdfsdf = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
+                                sdfsdf:Play()
                             end
                         end
                     end
@@ -535,9 +554,12 @@ do
             elseif val == "Penis" then
                 cock = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90))})
                 cock:Play()
+            elseif val == "KillMyself" then
+                sdfsdf = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
+                sdfsdf:Play()
             end
         end,
-        ["List"] = {"Cool", "German", "Penis"},
+        ["List"] = {"Cool", "German", "Penis", "KillMyself"},
         ["Default"] = "Cool"
     })
     animspeed = katog:CreateSlider({
@@ -826,14 +848,14 @@ Tabs["Combat"]:CreateToggle({
 })
 
 do
-    local reachvalue = {["Value"] = 17.4}
+    local reachvalue = {["Value"] = 18}
     local reachtog = Tabs["Combat"]:CreateToggle({
         ["Name"] = "Reach",
         ["Keybind"] = nil,
         ["Callback"] = function(v)
             getgenv().reachval = v
             if getgenv().reachval then
-                CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = 17.4
+                CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = reachvalue["Value"]
             else
                 CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
             end
@@ -845,8 +867,8 @@ do
             CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = reachvalue["Value"]
         end,
         ["Min"] = 1,
-        ["Max"] = 17.4,
-        ["Default"] = 17.4,
+        ["Max"] = 18,
+        ["Default"] = 18,
         ["Round"] = 1
     })
 end
@@ -885,8 +907,11 @@ do
                     end
                 end)
                 repeat wait() 
-                    if (not thing) then return end
-                until matchState == 1
+                    if (not thing) then 
+                        break 
+                    end
+                until (matchState == 1)
+                if (not thing) then return end
                 if speeddropdown["Value"] == "CFrame" then
                     if matchState == 1 then
                         spawn(function()
@@ -1557,6 +1582,7 @@ Tabs["Render"]:CreateToggle({
                 end
                 for i,people in pairs(players:GetChildren())do
                     if people ~= players.LocalPlayer then
+                        wait(0.3)
                         currentPlayer = people
                         createESP(people.Character)
                         people.CharacterAdded:Connect(function(character)
