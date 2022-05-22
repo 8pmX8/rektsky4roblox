@@ -549,13 +549,13 @@ do
         ["Name"] = "AnimMode",
         ["Function"] = function(val)
             if val == "German" then
-                zdsqzd = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56))})
+                zdsqzd = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56))})
                 zdsqzd:Play()
             elseif val == "Penis" then
-                cock = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90))})
+                cock = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90))})
                 cock:Play()
             elseif val == "KillMyself" then
-                sdfsdf = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
+                sdfsdf = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
                 sdfsdf:Play()
             end
         end,
