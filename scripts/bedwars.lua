@@ -401,7 +401,7 @@ local function getwool()
 	return nil
 end
 
-repeat task.wait() until (game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]:FindFirstChild("@flamework"))
+repeat task.wait() until (game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]:FindFirstChild("@easy-games"))
 
 local BlockController2 = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.client.placement["block-placer"]).BlockPlacer
 local blockcontroller = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out).BlockEngine
