@@ -118,3 +118,69 @@ do
         ["Round"] = 1
     })
 end
+
+local function isAlive(plr)
+	if plr then
+		return plr and plr.Character and plr.Character.Parent ~= nil and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Head") and plr.Character:FindFirstChild("Humanoid")
+	end
+	return lplr and lplr.Character and lplr.Character.Parent ~= nil and lplr.Character:FindFirstChild("HumanoidRootPart") and lplr.Character:FindFirstChild("Head") and lplr.Character:FindFirstChild("Humanoid")
+end
+
+do
+    Tabs["Render"]:CreateToggle({
+        ["Name"] = "ESP",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            local thing
+            local espval = v
+            if espval then
+                spawn(function()
+                    local ESPFolder = Instance.new("Folder")
+                    ESPFolder.Name = "ESPFolder"
+                    ESPFolder.Parent = ScreenGuitwo
+                    repeat
+                        task.wait()
+                        if (not espval) then break end
+                        for i,plr in pairs(game.Players:GetChildren()) do
+                            if ESPFolder:FindFirstChild(plr.Name) then
+                                thing = ESPFolder[plr.Name]
+                                thing.Visible = false
+                            else
+                                thing = Instance.new("ImageLabel")
+                                thing.BackgroundTransparency = 1
+                                thing.BorderSizePixel = 0
+                                thing.Image = getcustomassetthingylol("rektsky/assets/esppic.png")
+                                thing.Visible = false
+                                thing.Name = plr.Name
+                                thing.Parent = ESPFolder
+                                thing.Size = UDim2.new(0, 256, 0, 256)
+                            end
+                            
+                            if isAlive(plr) and plr ~= lplr and plr.Team ~= tostring(lplr.Team) then
+                                local rootPos, rootVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+                                local rootSize = (plr.Character.HumanoidRootPart.Size.X * 1200) * (cam.ViewportSize.X / 1920)
+                                local headPos, headVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position + Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
+                                local legPos, legVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position - Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
+                                rootPos = rootPos
+                                if rootVis then
+                                    print("lol")
+                                    thing.Visible = rootVis
+                                    thing.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
+                                    thing.Position = UDim2.new(0, rootPos.X - thing.Size.X.Offset / 2, 0, (rootPos.Y - thing.Size.Y.Offset / 2) - 36)
+                                end
+                            end
+                        end
+                    until (not espval)
+                end)
+                game.Players.PlayerRemoving:connect(function(plr)
+                    if ESPFolder:FindFirstChild(plr.Name) then
+                        ESPFolder[plr.Name]:Remove()
+                    end
+                end)
+            else
+                ESPFolder:remove()
+                return
+            end
+        end
+    })
+end
