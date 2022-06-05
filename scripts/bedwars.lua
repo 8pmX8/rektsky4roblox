@@ -572,37 +572,6 @@ do
     })
 end
 
-do
-    local tpauradist = {["Value"] = 150}
-    local tpauraticks = {["Value"] = 0.3}
-    local tpauraval = false
-    Tabs["Combat"]:CreateToggle({
-        ["Name"] = "TPAura",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            tpauraval = v
-            if tpauraval then
-                clonemake()
-                local closestplr = GetAllNearestHumanoidToPosition(tpauradist["Value"], 1)
-                repeat
-                    if (not tpauraval) then return end
-                    task.wait(0.3)
-                    if closestplr then
-                        for i, v in pairs(closestplr) do
-                            realchar.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
-                            task.wait(tpauraticks["Value"])
-                            realchar.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame
-                            task.wait(tpauraticks["Value"])
-                        end
-                    end
-                until (not tpauraval)
-            else
-                clone:remove()
-                lplr.Character = realchar
-            end
-        end
-    })
-end
 
 --[[local conectionkillauraV2
 Tabs["Combat"]:CreateToggle({
