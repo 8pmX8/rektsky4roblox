@@ -572,6 +572,38 @@ do
     })
 end
 
+do
+    local tpauradist = {["Value"] = 150}
+    local tpauraticks = {["Value"] = 0.3}
+    local tpauraval = false
+    Tabs["Combat"]:CreateToggle({
+        ["Name"] = "TPAura",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            tpauraval = v
+            if tpauraval then
+                clonemake()
+                local closestplr = GetAllNearestHumanoidToPosition(tpauradist["Value"], 1)
+                repeat
+                    if (not tpauraval) then return end
+                    task.wait(0.3)
+                    if closestplr then
+                        for i, v in pairs(closestplr) do
+                            realchar.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame
+                            task.wait(tpauraticks["Value"])
+                            realchar.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame
+                            task.wait(tpauraticks["Value"])
+                        end
+                    end
+                until (not tpauraval)
+            else
+                clone:remove()
+                lplr.Character = realchar
+            end
+        end
+    })
+end
+
 --[[local conectionkillauraV2
 Tabs["Combat"]:CreateToggle({
     ["Name"] = "KillAuraV2",
@@ -1544,57 +1576,54 @@ Tabs["Render"]:CreateToggle({
     ["Name"] = "ESP",
     ["Keybind"] = nil,
     ["Callback"] = function(v)
+        local thing
         local espval = v
         if espval then
-            function createFlex()
-                players.PlayerAdded:Connect(function(p)
-                    currentPlayer = p
-                    p.CharacterAdded:Connect(function(character)
-                        createESP(character)            
-                    end)     
-                end)
-                function checkPart(obj)  if (obj:IsA("Part") or obj:IsA("MeshPart")) and obj.Name~="HumanoidRootPart" then return true end end 
-                function actualESP(obj) 
-                    for i=0,5 do
-                        surface = Instance.new("SurfaceGui",obj)
-                        surface.Face = Enum.NormalId[espfaces[i+1]]
-                        surface.AlwaysOnTop = true
-            
-                        frame = Instance.new("Frame",surface)
-                        frame.Size = UDim2.new(1,0,1,0)
-                        frame.BorderSizePixel = 0                                               
-                        frame.BackgroundTransparency = 0
-            
-                        if currentPlayer.Team == players.LocalPlayer.Team then
-                            frame.BackgroundColor3 = Color3.new(ALLYCOLOR[1],ALLYCOLOR[2],ALLYCOLOR[3])                                         
+            spawn(function()
+                local ESPFolder = Instance.new("Folder")
+                ESPFolder.Name = "ESPFolder"
+                ESPFolder.Parent = ScreenGuitwo
+                repeat
+                    task.wait()
+                    if (not espval) then break end
+                    for i,plr in pairs(game.Players:GetChildren()) do
+                        if ESPFolder:FindFirstChild(plr.Name) then
+                            thing = ESPFolder[plr.Name]
+                            thing.Visible = false
                         else
-                            frame.BackgroundColor3 = Color3.new(ENEMYCOLOR[1],ENEMYCOLOR[2],ENEMYCOLOR[3])
+                            thing = Instance.new("ImageLabel")
+                            thing.BackgroundTransparency = 1
+                            thing.BorderSizePixel = 0
+                            thing.Image = getcustomassetthingylol("rektsky/assets/esppic.png")
+                            thing.Visible = false
+                            thing.Name = plr.Name
+                            thing.Parent = ESPFolder
+                            thing.Size = UDim2.new(0, 256, 0, 256)
+                        end
+                        
+                        if isAlive(plr) and plr ~= lplr and plr.Team ~= tostring(lplr.Team) then
+                            local rootPos, rootVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+                            local rootSize = (plr.Character.HumanoidRootPart.Size.X * 1200) * (cam.ViewportSize.X / 1920)
+                            local headPos, headVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position + Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
+                            local legPos, legVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position - Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
+                            rootPos = rootPos
+                            if rootVis then
+                                print("lol")
+                                thing.Visible = rootVis
+                                thing.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
+                                thing.Position = UDim2.new(0, rootPos.X - thing.Size.X.Offset / 2, 0, (rootPos.Y - thing.Size.Y.Offset / 2) - 36)
+                            end
                         end
                     end
+                until (not espval)
+            end)
+            game.Players.PlayerRemoving:connect(function(plr)
+                if ESPFolder:FindFirstChild(plr.Name) then
+                    ESPFolder[plr.Name]:Remove()
                 end
-                function createESP(c)
-                    bugfix = c:WaitForChild("Head")
-                    for i,v in pairs(c:GetChildren()) do
-                        if checkPart(v) then
-                            actualESP(v)
-                        end
-                    end
-                end
-                for i,people in pairs(players:GetChildren())do
-                    if people ~= players.LocalPlayer then
-                        wait(0.3)
-                        currentPlayer = people
-                        createESP(people.Character)
-                        people.CharacterAdded:Connect(function(character)
-                            wait(0.3)
-                            createESP(character)            
-                        end)
-                    end
-                end
-            end
-            createFlex()
+            end)
         else
-            surface:Destroy()
+            ESPFolder:remove()
             return
         end
     end
