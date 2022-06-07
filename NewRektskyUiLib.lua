@@ -9,27 +9,6 @@ local lib = {
     ["Objects"] = {}
 }
 
-if isfolder("rektsky") == false then
-    makefolder("rektsky")
-end
-
-if isfolder("rektsky/sound") == false then
-    makefolder("rektsky/sound")
-end
-
-if isfolder("rektsky/sound/mc") == false then
-    makefolder("rektsky/sound/mc")
-end
-
-if isfolder("rektsky/assets") == false then
-    makefolder("rektsky/assets")
-end
-
-if isfolder("rektsky/config") == false then
-    makefolder("rektsky/config")
-end
-
-
 local sliderapi = {}
 
 local foldername = "rektsky/config"
@@ -160,6 +139,30 @@ local function getcustomassetfuncforsounds(path)
         cachedassetstwo[path] = getasset(path) 
     end
     return cachedassetstwo[path]
+end
+
+if isfolder("rektsky") == false then
+    makefolder("rektsky")
+end
+
+if isfolder("rektsky/sound") == false then
+    makefolder("rektsky/sound")
+end
+
+if isfolder("rektsky/sound/mc") == false then
+    makefolder("rektsky/sound/mc")
+end
+
+if isfolder("rektsky/assets") == false then
+    makefolder("rektsky/assets")
+end
+
+if isfolder("rektsky/config") == false then
+    makefolder("rektsky/config")
+end
+
+if isfolder("rektsky/scripts") == false then
+    makefolder("rektsky/scripts")
 end
 
 function lib:ToggleLib()
@@ -296,6 +299,7 @@ function lib:CreateWindow()
     local uilistthingy = Instance.new("UIListLayout")
     TabsFrame.Name = "Tabs"
     TabsFrame.Parent = ScreenGui
+    ScreenGui.Modal = true
     TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TabsFrame.BackgroundTransparency = 1.000
     TabsFrame.BorderSizePixel = 0
