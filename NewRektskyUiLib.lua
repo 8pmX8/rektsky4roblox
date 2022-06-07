@@ -299,7 +299,6 @@ function lib:CreateWindow()
     local uilistthingy = Instance.new("UIListLayout")
     TabsFrame.Name = "Tabs"
     TabsFrame.Parent = ScreenGui
-    ScreenGui.Modal = true
     TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TabsFrame.BackgroundTransparency = 1.000
     TabsFrame.BorderSizePixel = 0
@@ -316,6 +315,7 @@ function lib:CreateWindow()
         local tabname = Instance.new("TextLabel")
         local assetthing = Instance.new("ImageLabel")
         local uilistlay = Instance.new("UIListLayout")
+        tab.Modal = true
         uilistlay.Parent = tab
         uilistlay.SortOrder = Enum.SortOrder.LayoutOrder
         tab.Name = title
