@@ -88,7 +88,7 @@ local itemtablefunc = require(game:GetService("ReplicatedStorage").TS.item["item
 local itemtable = debug.getupvalue(itemtablefunc, 1)
 local matchend = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.game.match["match-end-controller"]).MatchEndController
 local matchstate = require(game:GetService("ReplicatedStorage").TS.match["match-state"]).MatchState
-local KnitClient = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"].knit.src).KnitClient
+local KnitClient = debug.getupvalue(require(lplr.PlayerScripts.TS.knit).setup, 6)
 local ballooncontroller = KnitClient.Controllers.BalloonController
 local queuemeta = require(game:GetService("ReplicatedStorage").TS.game["queue-meta"]).QueueMeta
 local clntstorehandlr = require(game.Players.LocalPlayer.PlayerScripts.TS.ui.store).ClientStore
@@ -401,7 +401,8 @@ local function getwool()
 	return nil
 end
 
-repeat task.wait() until (game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]:FindFirstChild("@easy-games"))
+local Flamework = require(game.ReplicatedStorage["rbxts_include"]["node_modules"]["@flamework"].core.out).Flamework
+repeat task.wait() until (Flamework.isInitialized)
 
 local BlockController2 = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.client.placement["block-placer"]).BlockPlacer
 local blockcontroller = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out).BlockEngine
