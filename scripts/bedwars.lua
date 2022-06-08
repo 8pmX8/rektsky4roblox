@@ -1,25 +1,188 @@
 repeat task.wait() until game:IsLoaded()
 
-local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
+local lib = {
+    ["Rainbow"] = false,
+    ["Notifications"] = false,
+    ["Sounds"] = true,
+    ["GuiKeybind"] = "RightShift",
+    ["IsDraggable"] = true,
+    ["Objects"] = {}
+}
 
-local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
+local sliderapi = {}
 
-do
-    local oldcharacteradded = entity.characterAdded
-    entity.characterAdded = function(plr, char, localcheck)
-        return oldcharacteradded(plr, char, localcheck, function() end)
-    end
-    entity.fullEntityRefresh()
+local foldername = "rektsky/config"
+local conf = {
+	["file"]=foldername.."/"..game.PlaceId..".json",
+	["functions"]={}
+}
+
+if game.PlaceId == 6872274481 or game.PlaceId == 8560631822 or game.PlaceId == 8444591321 then
+    conf["file"] = foldername.."/bedwars.json"
 end
 
-local spawn = function(func) 
-    return coroutine.wrap(func)()
+function conf.functions:MakeFile()
+	if isfile(conf["file"]) then return end
+	if not isfolder(foldername)  then
+		makefolder(foldername)
+	end
+	writefile(conf["file"],"{}")
 end
 
+function conf.functions:LoadConfigs()
+	if not isfile(conf["file"]) then
+		conf["functions"]:MakeFile()
+	end
+    wait(0.5)
+	return game:GetService("HttpService"):JSONDecode(readfile(conf["file"]))
+end
+
+function conf.functions:WriteConfigs(tab)
+	conf["functions"]:MakeFile()
+	writefile(conf["file"],game:GetService("HttpService"):JSONEncode((tab or {})))
+end
+local configtable = (conf["functions"]:LoadConfigs() or {})
+
+local configsaving = true
+spawn(function()
+    repeat
+        conf["functions"]:WriteConfigs(configtable)
+        task.wait(5)
+    until (not configsaving)
+end)
+
+local keybinds = {}
+local ScreenGui = Instance.new("ScreenGui")
+local optionframe
+local TabsFrame
+ScreenGui.Parent = game:WaitForChild("CoreGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+local ScreenGuitwo = Instance.new("ScreenGui")
+ScreenGuitwo.Parent = game:WaitForChild("CoreGui")
+ScreenGuitwo.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGuitwo.Name = "RektskyNotificationGui"
 local getasset = getsynasset or getcustomasset
 
-local ScreenGuitwo = game.CoreGui.RektskyNotificationGui
+local requestfunc = syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
+    if tab.Method == "GET" then
+        return {
+            Body = game:HttpGet(tab.Url, true),
+            Headers = {},
+            StatusCode = 200
+        }
+    else
+        return {
+            Body = "bad exploit",
+            Headers = {},
+            StatusCode = 404
+        }
+    end
+end 
 
+local betterisfile = function(file)
+    local suc, res = pcall(function() return readfile(file) end)
+    return suc and res ~= nil
+end
+
+local cachedassets = {}
+local function getcustomassetfunc(path)
+    if not betterisfile(path) then
+        spawn(function()
+            local textlabel = Instance.new("TextLabel")
+            textlabel.Size = UDim2.new(1, 0, 0, 36)
+            textlabel.Text = "Downloading "..path
+            textlabel.BackgroundTransparency = 1
+            textlabel.TextStrokeTransparency = 0
+            textlabel.TextSize = 30
+            textlabel.Font = Enum.Font.SourceSans
+            textlabel.TextColor3 = Color3.new(1, 1, 1)
+            textlabel.Position = UDim2.new(0, 0, 0, -36)
+            textlabel.Parent = ScreenGuitwo
+            repeat wait() until betterisfile(path)
+            textlabel:Remove()
+        end)
+        local req = requestfunc({
+            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/assets", "assets"),
+            Method = "GET"
+        })
+        writefile(path, req.Body)
+    end
+    if cachedassets[path] == nil then
+        cachedassets[path] = getasset(path) 
+    end
+    return cachedassets[path]
+end
+
+local cachedassetstwo = {}
+local function getcustomassetfuncforsounds(path)
+    if not betterisfile(path) then
+        spawn(function()
+            local textlabel = Instance.new("TextLabel")
+            textlabel.Size = UDim2.new(1, 0, 0, 36)
+            textlabel.Text = "Downloading "..path
+            textlabel.BackgroundTransparency = 1
+            textlabel.TextStrokeTransparency = 0
+            textlabel.TextSize = 30
+            textlabel.Font = Enum.Font.SourceSans
+            textlabel.TextColor3 = Color3.new(1, 1, 1)
+            textlabel.Position = UDim2.new(0, 0, 0, -36)
+            textlabel.Parent = ScreenGuitwo
+            repeat wait() until betterisfile(path)
+            textlabel:Remove()
+        end)
+        local req = requestfunc({
+            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/sound", "sound"),
+            Method = "GET"
+        })
+        writefile(path, req.Body)
+    end
+    if cachedassetstwo[path] == nil then
+        cachedassetstwo[path] = getasset(path) 
+    end
+    return cachedassetstwo[path]
+end
+
+if isfolder("rektsky") == false then
+    makefolder("rektsky")
+end
+
+if isfolder("rektsky/sound") == false then
+    makefolder("rektsky/sound")
+end
+
+if isfolder("rektsky/sound/mc") == false then
+    makefolder("rektsky/sound/mc")
+end
+
+if isfolder("rektsky/assets") == false then
+    makefolder("rektsky/assets")
+end
+
+if isfolder("rektsky/config") == false then
+    makefolder("rektsky/config")
+end
+
+if isfolder("rektsky/scripts") == false then
+    makefolder("rektsky/scripts")
+end
+
+function lib:ToggleLib()
+    if not ScreenGui.Enabled and game:GetService("UserInputService"):GetFocusedTextBox() == nil then
+        ScreenGui.Enabled = true
+    else
+        if game:GetService("UserInputService"):GetFocusedTextBox() == nil then
+            ScreenGui.Enabled = false
+        end
+    end
+end
+local uis = game:GetService("UserInputService")
+local input = game:GetService("UserInputService")
+local ms = game.Players.LocalPlayer:GetMouse()
+local ts = game:GetService("TweenService")
+local tweens = {Notification = function(base)
+    ts:Create(base, TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {Position = UDim2.new(0.438, 0,0.053, 0)}):Play()
+end}
+local Background
 local function createnotification(title, text, delay2, toggled)
     spawn(function()
         if ScreenGuitwo:FindFirstChild("Background") then ScreenGuitwo:FindFirstChild("Background"):Destroy() end
@@ -69,110 +232,46 @@ local function createnotification(title, text, delay2, toggled)
         end)
     end)
 end
-
-repeat task.wait() until (entity.isAlive)
-
-local lplr = game:GetService("Players").LocalPlayer
-local char = lplr.Character
-local hrp = char.HumanoidRootPart
-local hmd = char.Humanoid
-local cam = workspace.CurrentCamera
-local RunService = game:GetService("RunService")
-local Client = require(game:GetService("ReplicatedStorage").TS.remotes).default.Client
-
-local SwordCont = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.global.combat.sword["sword-controller"]).SwordController
-local sprintthingy = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.global.sprint["sprint-controller"]).SprintController
-local kbtable = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.damage["knockback-util"]).KnockbackUtil.calculateKnockbackVelocity, 1)
-local InventoryUtil = require(game:GetService("ReplicatedStorage").TS.inventory["inventory-util"]).InventoryUtil
-local itemtablefunc = require(game:GetService("ReplicatedStorage").TS.item["item-meta"]).getItemMeta
-local itemtable = debug.getupvalue(itemtablefunc, 1)
-local matchend = require(game:GetService("Players").LocalPlayer.PlayerScripts.TS.controllers.game.match["match-end-controller"]).MatchEndController
-local matchstate = require(game:GetService("ReplicatedStorage").TS.match["match-state"]).MatchState
-local KnitClient = debug.getupvalue(require(lplr.PlayerScripts.TS.knit).setup, 6)
-local ballooncontroller = KnitClient.Controllers.BalloonController
-local queuemeta = require(game:GetService("ReplicatedStorage").TS.game["queue-meta"]).QueueMeta
-local clntstorehandlr = require(game.Players.LocalPlayer.PlayerScripts.TS.ui.store).ClientStore
-local matchState = clntstorehandlr:getState().Game.matchState
-local itemmeta = require(game:GetService("ReplicatedStorage").TS.item["item-meta"])
-local itemstuff = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.item["item-meta"]).getItemMeta, 1)
-local uis = game:GetService("UserInputService")
-
-local realchar
-local clone
-local function clonemake()
-    realchar = lplr.Character
-    realchar.Archivable = true
-    clone = realchar:Clone()
-    clone.Parent = workspace
-    lplr.Character = clone
-end
-
-local clonetwo
-local function secondclonemake()
-    clonetwo = realchar:Clone()
-    clonetwo.Parent = workspace
-end
-
-spawn(function()
-    while wait(1) do
-        matchState = clntstorehandlr:getState().Game.matchState
-    end
-end)
-
-local function getremote(tab)
-    for i,v in pairs(tab) do
-        if v == "Client" then
-            return tab[i + 1]
+createnotification("Loaded", "Press Right-Shift to toggle GUI", 3, true)
+local function dragGUI(gui, dragpart)
+    spawn(function()
+        local dragging
+        local dragInput
+        local dragStart = Vector3.new(0,0,0)
+        local startPos
+        local function update(input)
+            local delta = input.Position - dragStart
+            local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + (delta.X), startPos.Y.Scale, startPos.Y.Offset + (delta.Y))
+            game:GetService("TweenService"):Create(gui, TweenInfo.new(.20), {Position = Position}):Play()
         end
-    end
-    return ""
-end
-
-function hash(p1)
-    local hashmod = require(game:GetService("ReplicatedStorage").TS["remote-hash"]["remote-hash-util"])
-    local toret = hashmod.RemoteHashUtil:prepareHashVector3(p1)
-    return toret
-end
-
-local attackentitycont = Client:Get(getremote(debug.getconstants(getmetatable(KnitClient.Controllers.SwordController)["attackEntity"])))  
-
-function getinv(plr)
-    local plr = plr or lplr
-    local thingy, thingytwo = pcall(function() return InventoryUtil.getInventory(plr) end)
-    return (thingy and thingytwo or {
-        items = {},
-        armor = {},
-        hand = nil
-    })
-end
-
-function getsword()
-    local sd
-    local higherdamage
-    local swordslots
-    local swords = getinv().items
-    for i, v in pairs(swords) do
-        if v.itemType:lower():find("sword") or v.itemType:lower():find("blade") then
-            if higherdamage == nil or itemstuff[v.itemType].sword.damage > higherdamage then
-                sd = v
-                higherdamage = itemstuff[v.itemType].sword.damage
-                swordslots = i
+        dragpart.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch and dragging == false then
+                    dragStart = input.Position
+                    local delta = (input.Position - dragStart)
+                    if delta.Y <= 30 then
+                        dragging = dragpart.Visible
+                        startPos = gui.Position
+                        
+                        input.Changed:Connect(function()
+                            if input.UserInputState == Enum.UserInputState.End then
+                                dragging = false
+                            end
+                        end)
+                    end
+                end
+        end)
+        dragpart.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
             end
-        end
-    end
-    return sd, swordslots
+        end)
+        uis.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                update(input)
+            end
+        end)
+    end)
 end
-
-local function hvFunc(cock)
-    return {hashedval = cock}
-end
-
-local killauraissoundenabled = {["Value"] = false}
-local killaurasoundvalue = {["Value"] = 1}
-local killauraisswingenabled = {["Value"] = false}
-local DistVal = {["Value"] = 18}
-local killaurafirstpersonanim = {["Value"] = true}
-local killauraanimval = {["Value"] = "Cool"}
 
 local function playsound(id, volume) 
     local sound = Instance.new("Sound")
@@ -185,2592 +284,550 @@ local function playsound(id, volume)
     sound:Destroy()
 end
 
-local function isAlive(plr)
-	if plr then
-		return plr and plr.Character and plr.Character.Parent ~= nil and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Head") and plr.Character:FindFirstChild("Humanoid")
-	end
-	return lplr and lplr.Character and lplr.Character.Parent ~= nil and lplr.Character:FindFirstChild("HumanoidRootPart") and lplr.Character:FindFirstChild("Head") and lplr.Character:FindFirstChild("Humanoid")
-end
-
-local function playanimation(id) 
-    if isAlive() then 
-        local animation = Instance.new("Animation")
-        animation.AnimationId = id
-        local animatior = lplr.Character.Humanoid.Animator
-        animatior:LoadAnimation(animation):Play()
-    end
-end
-
-local funnyanim = {
-    {CFrame = CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.10},
-    {CFrame = CFrame.new(0.5, -0.51, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.08},
-    {CFrame = CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56)), Time = 0.08}
-}
-
-local autoblockanim = {
-    {CFrame = CFrame.new(-0.01, -0.01, -1.01) * CFrame.Angles(math.rad(-90), math.rad(90), math.rad(0)), Time = 0.08},
-    {CFrame = CFrame.new(-0.01, -0.01, -1.01) * CFrame.Angles(math.rad(10), math.rad(70), math.rad(-90)), Time = 0.08},
-}
-
-local theotherfunnyanim = {
-    {CFrame = CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.05},
-    {CFrame = CFrame.new(-1.8, -0.21, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90)), Time = 0.05}
-}
-
-local kmsanim = {
-    {CFrame = CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.1},
-    {CFrame = CFrame.new(-2.5, -1, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.05}
-}
-
-local rgfejd = false
-local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
-function KillauraRemote()
-    for i,v in pairs(game.Players:GetChildren()) do
-        for k, b in pairs(whitelists) do
-            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") and v.UserId ~= tonumber(b) then
-                local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
-                    if v.Character.Humanoid.Health > 0 then
-                        rgfejd = true
-                        local GBW = getsword()
-                        local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
-                        local Entity = v.Character
-                        local target = v.Character:GetPrimaryPartCFrame().Position
-                        attackentitycont:CallServer({
-                            ["chargedAttack"] = {["chargeRatio"] = 1},
-                            ["weapon"] = GBW ~= nil and GBW.tool,
-                            ["entityInstance"] = Entity,
-                            ["validate"] = {["targetPosition"] = {["value"] = target,
-                                ["hash"] = hvFunc(target)},
-                                ["raycast"] = {
-                                    ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
-                                    ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
-                                },
-                                ["selfPosition"] = {["value"] = selfPosition,
-                                    ["hash"] = hvFunc(selfPosition)
-                                }
-                            }
-                        })
-                        if killauraissoundenabled["Value"] then
-                            playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
-                        end
-                        if killauraisswingenabled["Value"] then         
-                            playanimation("rbxassetid://4947108314")
-                        end
-                    end
-                else
-                    rgfejd = false
-                end
-            end
-        end
-    end 
-end
-
--- targetcheck, isplayertargetable, getallnearesthumanoidtoposition are from vape, i used those for the kill aura anims
-
-local function targetCheck(plr, check)
-	return (check and plr.Character.Humanoid.Health > 0 and plr.Character:FindFirstChild("ForceField") == nil or check == false)
-end
-
-local function isPlayerTargetable(plr, target)
-    return plr ~= lplr and plr and isAlive(plr) and targetCheck(plr, target)
-end
-
-local function GetAllNearestHumanoidToPosition(distance, amount)
-    local returnedplayer = {}
-    local currentamount = 0
-    if entity.isAlive then -- alive check
-        for i, v in pairs(game.Players:GetChildren()) do -- loop through players
-            if isPlayerTargetable((v), true, true, v.Character ~= nil) and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Head") and currentamount < amount then -- checks
-                local mag = (lplr.Character.HumanoidRootPart.Position - v.Character:FindFirstChild("HumanoidRootPart").Position).magnitude
-                if mag <= distance then -- mag check
-                    table.insert(returnedplayer, v)
-                    currentamount = currentamount + 1
-                end
-            end
-        end
-        for i2,v2 in pairs(game:GetService("CollectionService"):GetTagged("Monster")) do -- monsters
-            if v2:FindFirstChild("HumanoidRootPart") and currentamount < amount and v2.Name ~= "Duck" then -- no duck
-                local mag = (lplr.Character.HumanoidRootPart.Position - v2.HumanoidRootPart.Position).magnitude
-                if mag <= distance then -- magcheck
-                    table.insert(returnedplayer, {Name = (v2 and v2.Name or "Monster"), UserId = 1443379645, Character = v2}) -- monsters are npcs so I have to create a fake player for target info
-                    currentamount = currentamount + 1
-                end
-            end
+local function playdingsound(istrue) 
+    if lib["Sounds"] then
+        if istrue then
+            playsound(getcustomassetfuncforsounds("rektsky/sound/enable.mp3") or getasset("rektsky/sound/enable.mp3"))
+        else
+            playsound(getcustomassetfuncforsounds("rektsky/sound/disable.mp3") or getasset("rektsky/sound/disable.mp3"))
         end
     end
-    return returnedplayer -- table of attackable entities
 end
 
-local germanthingy = false
-function funianimthing()
+local tabs = {}
+function lib:CreateWindow()
+    TabsFrame = Instance.new("Frame")
+    local uilistthingy = Instance.new("UIListLayout")
+    TabsFrame.Name = "Tabs"
+    TabsFrame.Parent = ScreenGui
+    TabsFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    TabsFrame.BackgroundTransparency = 1.000
+    TabsFrame.BorderSizePixel = 0
+    TabsFrame.Position = UDim2.new(0.010, 0,0.010, 0)
+    TabsFrame.Size = UDim2.new(0, 207, 0, 40)
+    TabsFrame.AutomaticSize = "X"
+    uilistthingy.Parent = TabsFrame
+    uilistthingy.FillDirection = Enum.FillDirection.Horizontal
+    uilistthingy.SortOrder = Enum.SortOrder.LayoutOrder
+    uilistthingy.Padding = UDim.new(0, 40)
+    function lib:CreateTab(title, color, asset)
+        table.insert(tabs, #tabs)
+        local tab = Instance.new("TextButton")
+        local tabname = Instance.new("TextLabel")
+        local assetthing = Instance.new("ImageLabel")
+        local uilistlay = Instance.new("UIListLayout")
+        tab.Modal = true
+        uilistlay.Parent = tab
+        uilistlay.SortOrder = Enum.SortOrder.LayoutOrder
+        tab.Name = title
+        tab.ZIndex = 1
+        tab.Parent = TabsFrame
+        tab.BackgroundColor3 = Color3.fromRGB(14, 14, 23)
+        tab.BorderSizePixel = 0
+        tab.Position = UDim2.new(0,40,0.858895704, 0)
+        tab.Size = UDim2.new(0, 207, 0, 40)
+        tab.Active=true
+        tab.LayoutOrder = 1 + #tabs
+        tab.AutoButtonColor = false
     
-end
-
-local isclone = false
-
---[[function kickKillauraRemote()
-    if (not isclone) then
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        for i,v in pairs(game.Players:GetChildren()) do
-            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if mag <= 20 and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                    if v.Character:FindFirstChild("Head") then
-                        game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                            ["invisibleLandmine"] = v.Character.Head
-                        })
-                    end
-                end
-            end
-        end 
-    else
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        for i,v in pairs(game.Players:GetChildren()) do
-            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                local mag = (v.Character.HumanoidRootPart.Position - clone.HumanoidRootPart.Position).Magnitude
-                if mag <= 20 and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                    if v.Character:FindFirstChild("Head") then
-                        game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                            ["invisibleLandmine"] = v.Character.Head                
-                        })
-                    end
-                end
-            end
-        end 
-    end
-end--]]
-
-function getclosebed()
-    for i,v in pairs(game:GetService("Workspace").Map.Blocks:GetChildren()) do
-        if v.Name == "bed" and v:FindFirstChild("Covers") then
-            local magcheck = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Covers.Position).Magnitude
-            if magcheck <= 45 then
-                return v
-            end
-        end
-    end
-end
-
-local added
-function getanumber()
-    added = 0
-    for i,v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
-        local target = getclosebed()
-        if target ~= nil and v.Position then
-            if target.Position.X == v.Position.X and target.Position.Z == v.Position.Z then
-                if v.Position.Y > target.Position.Y and v.Position.Y - target.Position.Y < 16.5 then
-                    added = added + 1
-                end
-                if v.Position.Y < target.Position.Y and v.Position.Y - target.Position.Y < 16.5 then
-                    added = added - 1
-                end
-            end
-        end
-    end
-    return added
-end
-
-function hitblock(X,Y,Z)
-    local args = {
-        [1] = {
-            ["blockRef"] = {
-                ["blockPosition"] = Vector3.new(X/3,Y/3,Z/3)
-            },
-            ["hitPosition"] = Vector3.new(X/3,Y/3,Z/3),
-            ["hitNormal"] = Vector3.new(X/3,Y/3,Z/3)
+        tabname.Name = title
+        tabname.Parent = tab
+        tabname.ZIndex = tab.ZIndex + 1
+        tabname.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        tabname.BackgroundTransparency = 1.000
+        tabname.BorderSizePixel = 0
+        tabname.Position = UDim2.new(0, 199,0, 40)
+        tabname.Size = UDim2.new(0, 199,0, 40)
+        tabname.Font = Enum.Font.SourceSansLight
+        tabname.Text = " "..title
+        tabname.TextColor3 = color
+        tabname.TextSize = 22.000
+        tabname.TextWrapped = true
+        tabname.TextXAlignment = Enum.TextXAlignment.Left
+    
+        assetthing.Parent = tabname
+        assetthing.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        assetthing.BackgroundTransparency = 1
+        assetthing.Position = UDim2.new(0.86, 0,0.154, 0)
+        assetthing.Size = UDim2.new(0, 30, 0, 30)
+        assetthing.Image = getcustomassetfunc("rektsky/assets/" .. asset .. ".png") or getasset("rektsky/assets/" .. asset .. ".png")
+        local tabtable = {
+            ["Toggles"]={}
         }
-    }
-
-    game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.DamageBlock:InvokeServer(unpack(args))
-end
-
-
-local function getItem(itemName)
-	for i5, v5 in pairs(getinv(lplr)["items"]) do
-		if v5["itemType"] == itemName then
-			return v5, i5
-		end
-	end
-	return nil
-end
-
-local function getwool()
-	for i5, v5 in pairs(getinv(lplr)["items"]) do
-		if v5["itemType"]:match("wool") or v5["itemType"]:match("grass") then
-			return v5["itemType"], v5["amount"]
-		end
-	end	
-	return nil
-end
-
-local Flamework = require(game.ReplicatedStorage["rbxts_include"]["node_modules"]["@flamework"].core.out).Flamework
-repeat task.wait() until (Flamework.isInitialized)
-
-local BlockController2 = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out.client.placement["block-placer"]).BlockPlacer
-local blockcontroller = require(game:GetService("ReplicatedStorage")["rbxts_include"]["node_modules"]["@easy-games"]["block-engine"].out).BlockEngine
-local BlockEngine = require(lplr.PlayerScripts.TS.lib["block-engine"]["client-block-engine"]).ClientBlockEngine
-local blocktable = BlockController2.new(BlockEngine, getwool())
-function placeblockthing(newpos, customblock)
-    local placeblocktype = (customblock or getwool())
-    blocktable.blockType = placeblocktype
-    if blockcontroller:isAllowedPlacement(lplr, placeblocktype, Vector3.new(newpos.X / 3, newpos.Y / 3, newpos.Z / 3)) and getItem(placeblocktype) then
-        return blocktable:placeBlock(Vector3.new(newpos.X / 3, newpos.Y / 3, newpos.Z / 3))
-    end
-end
-
-lib:CreateWindow()
-
-local Tabs = {
-    ["Combat"] = lib:CreateTab("Combat",Color3.fromRGB(252, 60, 68),"combat"),
-    ["Movement"] = lib:CreateTab("Movement",Color3.fromRGB(255, 148, 36),"movement"),
-    ["Render"] = lib:CreateTab("Render",Color3.fromRGB(59, 170, 222),"render"),
-    ["Player"] = lib:CreateTab("Player",Color3.fromRGB(83, 214, 110),"player"),
-    ["Exploits"] = lib:CreateTab("Exploits",Color3.fromRGB(157, 39, 41),"exploit"),
-    ["Rektsky"] = lib:CreateTab("RektSky",Color3.fromRGB(64,124,252),"rektsky"),
-    ["World"] = lib:CreateTab("World",Color3.fromRGB(52,28,228),"world")
-}
-
--- COMBAT
-
-do
-    local oldbs
-    local conectionkillaura
-    local animspeed = {["Value"] = 0.3}
-    local origC0 = game.ReplicatedStorage.Assets.Viewmodel.RightHand.RightWrist.C0
-    local katog = Tabs["Combat"]:CreateToggle({
-        ["Name"] = "KillAura",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            local kauraval = v
-            repeat task.wait() until (matchState == 1)
-            spawn(function()
-                if (kauraval) then
-                    repeat
-                        task.wait()
-                        if (not kauraval) then break end
-                        if entity.isAlive then
-                            KillauraRemote()
-                        end
-                    until (not kauraval)
-                else
-                    return
-                end
-            end)
-            spawn(function()
-                repeat
-                    if (not kauraval) then return end
-                    task.wait(animspeed["Value"])
-                    local plrthinglopl = GetAllNearestHumanoidToPosition(DistVal["Value"], 1)
-                    if plrthinglopl then
-                        for i,v in pairs(plrthinglopl) do
-                            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                                if v.Team ~= tostring(lplr.Team) then
-                                    if killaurafirstpersonanim["Value"] then
-                                        if killauraanimval["Value"] == "Cool" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(autoblockanim) do
-                                                    coolanimlol = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    coolanimlol:Play()
-                                                    task.wait(v.Time - 0.01)
-                                                end
-                                            end
-                                        elseif killauraanimval["Value"] == "German" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(funnyanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
-                                                end
-                                            end
-                                        elseif killauraanimval["Value"] == "Penis" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(theotherfunnyanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
-                                                end
-                                            end
-                                        elseif killauraanimval["Value"] == "KillMyself" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(kmsanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
-                                                end
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                        if killauraanimval["Value"] == "Cool" then
-                            if (not rgfejd) then
-                                newthingy = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0})
-                                newthingy:Play()
-                            end
-                        end
-                        if killauraanimval["Value"] == "KillMyself" then
-                            if (not rgfejd) then
-                                sdfsdf = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
-                                sdfsdf:Play()
-                            end
-                        end
-                    end
-                until (not kauraval)
-            end)
-        end
-    })
-    killauraissoundenabled = katog:CreateOptionTog({
-        ["Name"] = "Swing Sound",
-        ["Default"] = true,
-        ["Func"] = function() end
-    })
-    killaurasoundvalue = katog:CreateSlider({
-        ["Name"] = "Sound",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 1,
-        ["Default"] = 0.2,
-        ["Round"] = 1
-    })
-    killauraisswingenabled = katog:CreateOptionTog({
-        ["Name"] = "Swing Animation",
-        ["Default"] = true,
-        ["Func"] = function() end
-    })
-    DistVal = katog:CreateSlider({
-        ["Name"] = "Distance",
-        ["Function"] = function() end,
-        ["Min"] = 1,
-        ["Max"] = 20,
-        ["Default"] = 20,
-        ["Round"] = 1
-    })
-    killaurafirstpersonanim = katog:CreateOptionTog({
-        ["Name"] = "Anims (1rs person)",
-        ["Default"] = true,
-        ["Func"] = function() end
-    })
-    killauraanimval = katog:CreateDropDown({
-        ["Name"] = "AnimMode",
-        ["Function"] = function(val)
-            if val == "German" then
-                zdsqzd = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(0.5, -0.01, -1.91) * CFrame.Angles(math.rad(-51), math.rad(9), math.rad(56))})
-                zdsqzd:Play()
-            elseif val == "Penis" then
-                cock = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-1.8, 0.5, -1.01) * CFrame.Angles(math.rad(-90), math.rad(0), math.rad(-90))})
-                cock:Play()
-            elseif val == "KillMyself" then
-                sdfsdf = game:GetService("TweenService"):Create(cam:WaitForChild("Viewmodel").RightHand.RightWrist, TweenInfo.new(0.1), {C0 = origC0 * CFrame.new(-2.5, -4.5, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0))})
-                sdfsdf:Play()
-            end
-        end,
-        ["List"] = {"Cool", "German", "Penis", "KillMyself"},
-        ["Default"] = "Cool"
-    })
-    animspeed = katog:CreateSlider({
-        ["Name"] = "AnimationSpeed",
-        ["Function"] = function() end,
-        ["Min"] = 0.1,
-        ["Max"] = 0.5,
-        ["Default"] = 0.3,
-        ["Round"] = 1
-    })
-end
-
-
---[[local conectionkillauraV2
-Tabs["Combat"]:CreateToggle({
-    ["Name"] = "KillAuraV2",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        local kauravalv2 = v
-        repeat task.wait() until (matchState == 1)
-        if matchState == 1 then
-            spawn(function()
-                if kauravalv2 and entity.isAlive then
-                    conectionkillauraV2 = RunService.RenderStepped:Connect(function(step)
-                        if not kauravalv2 then 
-                            return
-                        end
-                        if entity.isAlive then
-                            if (not isclone) then
-                                local mouse = game.Players.LocalPlayer:GetMouse()
-                                for i,v in pairs(game.Players:GetChildren()) do
-                                    if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                                        local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                                        if mag <= 20 and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                                            if v.Character:FindFirstChild("Head") then
-                                                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                                    ["invisibleLandmine"] = v.Character.Head                                        
-                                                })
-                                            end
-                                        end
-                                    end
-                                end 
-                            else
-                                local mouse = game.Players.LocalPlayer:GetMouse()
-                                for i,v in pairs(game.Players:GetChildren()) do
-                                    if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                                        local mag = (v.Character.HumanoidRootPart.Position - clone.HumanoidRootPart.Position).Magnitude
-                                        if mag <= 20 and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                                            if v.Character:FindFirstChild("Head") then
-                                                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                                    ["invisibleLandmine"] = v.Character.Head                                        
-                                                })
-                                            end
-                                        end
-                                    end
-                                end 
-                            end
-                        end
-                    end)
-                else
-                    conectionkillauraV2:Disconnect()
-                    return
-                end
-            end)
-        end
-    end
-})--]]
-
---[[local TPAURAFUNIv2
-local tpaurafunihaha
-tpaurafunihaha = Tabs["Combat"]:CreateToggle({
-    ["Name"] = "TPAura",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        TPAURAFUNIv2 = v
-        repeat task.wait() until (matchState == 1)
-        secondclonemake()
-        if matchState == 1 then
-            spawn(function()
-                if TPAURAFUNIv2 and entity.isAlive then
-                    if entity.isAlive then
-                        repeat
-                            wait()
-                            if (not TPAURAFUNIv2) then return end
-                            spawn(function()
-                                wait()
-                                local mouse = game.Players.LocalPlayer:GetMouse()
-                                for i,v in pairs(game.Players:GetChildren()) do
-                                    if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-                                        local mag = (v.Character.HumanoidRootPart.Position - clonetwo.HumanoidRootPart.Position).Magnitude
-                                        if mag <= 20 and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-                                            if v.Character:FindFirstChild("Head") then
-                                                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                                    ["invisibleLandmine"] = v.Character.Head                                        
-                                                })
-                                            end
-                                        end
-                                    end
-                                end 
-                            end)
-                            spawn(function()
-                                local plrthing = GetAllNearestHumanoidToPosition(600, 1)
-                                for i, plr in pairs(plrthing) do
-                                    clonetwo.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame
-                                    wait(0.6)
-                                    clonetwo.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame
-                                    wait(0.6)
-                                end
-                            end)
-                            spawn(function()
-                                repeat task.wait() until (matchState == 2)
-                                tpaurafunihaha:Toggle()
-                            end)
-                        until (not TPAURAFUNIv2)
-                    end
-                else
-                    clonetwo:remove()
-                    return
-                end
-            end)
-        end
-    end
-})--]]
-
---[[ 
-local ShieldRemote = getremote(debug.getconstants(debug.getprotos(getmetatable(KnitClient.Controllers.ShieldController).raiseShield)[1]))
-local connectionkaurablock
-Tabs["Combat"]:CreateToggle({
-    ["Name"] = "AutoBlockKillAura",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v and entity.isAlive then
-            connectionkaurablock = game:GetService("RunService").Stepped:connect(function()
-                spawn(function()
-                    task.wait()
-                    if not v then
-                        connectionkaurablock:Disconnect()
-                        return 
-                    end
-                    Client:Get(ShieldRemote):SendToServer({["raised"] = true})
-                    KillauraRemote()
-                end)
-            end)
-        else
-            connectionkaurablock:Disconnect()
-            return
-        end
-    end
-})
---]]
-
-do
-    local velohorizontal = {["Value"] = 0}
-    local velovertical = {["Value"] = 0}
-    local velocitytog = Tabs["Combat"]:CreateToggle({
-        ["Name"] = "Velocity",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            getgenv().veloval = v
-            spawn(function()
-                if getgenv().veloval then
-                    if not hmd then return end
-                    if hmd then
-                        kbtable["kbDirectionStrength"] = 0
-                        kbtable["kbUpwardStrength"] = 0
-                    end
-                else
-                    kbtable["kbDirectionStrength"] = 100
-                    kbtable["kbUpwardStrength"] = 100
-                    return
-                end
-            end)
-        end
-    })
-    velohorizontal = velocitytog:CreateSlider({
-        ["Name"] = "Horizontal",
-        ["Function"] = function() 
-            if hmd then
-                kbtable["kbDirectionStrength"] = velohorizontal["Value"]
-            end
-        end,
-        ["Min"] = 0,
-        ["Max"] = 100,
-        ["Default"] = 0,
-        ["Round"] = 0
-    })
-    velovertical = velocitytog:CreateSlider({
-        ["Name"] = "Vertical",
-        ["Function"] = function() 
-            if hmd then
-                kbtable["kbUpwardStrength"] = velovertical["Value"]
-            end
-        end,
-        ["Min"] = 0,
-        ["Max"] = 100,
-        ["Default"] = 0,
-        ["Round"] = 0
-    })
-end
-
-local itemtab = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.item["item-meta"]).getItemMeta, 1)
-local CombatConstant = require(game:GetService("ReplicatedStorage").TS.combat["combat-constant"]).CombatConstant
-
-local function getEquipped()
-    local typetext = ""
-    local obj = (entity.isAlive and lplr.Character:FindFirstChild("HandInvItem") and lplr.Character.HandInvItem.Value or nil)
-    if obj then
-        if obj.Name:find("sword") or obj.Name:find("blade") or obj.Name:find("baguette") or obj.Name:find("scythe") or obj.Name:find("dao") then
-            typetext = "sword"
-        end
-        if obj.Name:find("wool") or itemtab[obj.Name]["block"] then
-            typetext = "block"
-        end
-        if obj.Name:find("bow") then
-            typetext = "bow"
-        end
-    end
-    return {["Object"] = obj, ["Type"] = typetext}
-end
-
-do
-    local ACC1
-    local ACC2
-    local testtogttt = {["Value"] = 2}
-    local autoclickertog = Tabs["Combat"]:CreateToggle({
-        ["Name"] = "AutoClicker",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            if v then
-                local holding = false
-                ACC1 = uis.InputBegan:connect(function(input, gameProcessed)
-                    if gameProcessed and input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holding = true
-                    end
-                end)
-                ACC2 = uis.InputEnded:connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        holding = false
-                    end
-                end)
-                spawn(function()
-                    repeat
-                        task.wait(1/testtogttt["Value"])
-                        if holding then
-                            if holding == false then return end
-                            if getEquipped()["Type"] == "sword" then 
-                                if holding == false then return end
-                                SwordCont:swingSwordAtMouse()
-                            end
-                        end
-                    until (not v)
-                end)
-            else
-                ACC1:Disconnect()
-                ACC2:Disconnect()
-                return
-            end
-        end
-    })
-    testtogttt = autoclickertog:CreateSlider({
-        ["Name"] = "CPS",
-        ["Function"] = function() end,
-        ["Min"] = 1,
-        ["Max"] = 20,
-        ["Default"] = 20,
-        ["Round"] = 0
-    })
-end
-
-Tabs["Combat"]:CreateToggle({
-    ["Name"] = "NoClickDelay",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        getgenv().funisus = v
-        spawn(function()
-            if getgenv().funisus and entity.isAlive then
-                for i2,v2 in pairs(itemtable) do
-                    if type(v2) == "table" and rawget(v2, "sword") then
-                        v2.sword.attackSpeed = 0.000000001
-                    end
-                    SwordCont.isClickingTooFast = function() return false end
-                end
-            else
-            end
-        end)
-    end
-})
-
-do
-    local reachvalue = {["Value"] = 18}
-    local reachtog = Tabs["Combat"]:CreateToggle({
-        ["Name"] = "Reach",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            getgenv().reachval = v
-            if getgenv().reachval then
-                CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = reachvalue["Value"]
-            else
-                CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = 14.4
-            end
-        end
-    })
-    reachvalue = reachtog:CreateSlider({
-        ["Name"] = "Reach",
-        ["Function"] = function() 
-            CombatConstant.RAYCAST_SWORD_CHARACTER_DISTANCE = reachvalue["Value"]
-        end,
-        ["Min"] = 1,
-        ["Max"] = 18,
-        ["Default"] = 18,
-        ["Round"] = 1
-    })
-end
-
--- MOVEMENT
-
-function tpreal(t)
-    for i,v in pairs(realchar:GetDescendants()) do
-        if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-            v.Transparency = t
-        elseif v:IsA("Decal") then
-            v.Transparency = t
-        end
-    end
-end
-
-do
-    local connectionnn
-    local conectthing
-    local longjumpenabled
-    local floatdisab
-    local speed
-    local speedvalue = {["Value"] = 45}
-    local speeddropdown = {["Value"] = "CFrame"}
-    local speedvalueverus = {["Value"] = 80}
-    local verusspeeddelay = {["Value"] = 0.5}
-    local speedtog = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "Speed",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            local thing = v
-            if thing then
-                spawn(function()
-                    if matchState == 0 then
-                        createnotification("Speed", "Will enable speed when match started!", 4, true)
-                    end
-                end)
-                repeat wait() 
-                    if (not thing) then 
-                        break 
-                    end
-                until (matchState == 1)
-                if (not thing) then return end
-                if speeddropdown["Value"] == "CFrame" then
-                    if matchState == 1 then
-                        spawn(function()
-                            speed = 23
-                            connectionnn = game:GetService("RunService").Heartbeat:connect(function()
-                                local velo = lplr.Character.Humanoid.MoveDirection * speed
-                                lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                            end)
-                            conectthing = game:GetService("RunService").Stepped:connect(function(time, delta)
-                                if entity.isAlive then
-                                    if (not isnetworkowner(lplr.Character.HumanoidRootPart)) then
-                                        lagbacked = true
-                                    end
-                                    if (isnetworkowner(lplr.Character.HumanoidRootPart)) then
-                                        lagbacked = false
-                                    end
-                                    if speeddropdown["Value"] == "Verus" then conectthing:Disconnect() end
-                                    if lplr.Character.Humanoid.MoveDirection.Magnitude > 0 and isnetworkowner(lplr.Character.HumanoidRootPart) then
-                                        lplr.Character:TranslateBy(lplr.Character.Humanoid.MoveDirection * (lagbacked and speedvalue["Value"] * 3 or speedvalue["Value"] * 5.4) / 10 * delta)
-                                    end
-                                end
-                                task.wait()
-                            end)
-                        end)
-                    end
-                elseif speeddropdown["Value"] == "Verus" then
-                    pcall(function()
-                        if conectthing then conectthing:Disconnect() end
-                    end)
-                    speedverus = 23
-                    connectionnnverus = game:GetService("RunService").Heartbeat:connect(function()
-                        local velo = lplr.Character.Humanoid.MoveDirection * speed
-                        lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                    end)
-                    if matchState == 1 then
-                        repeat
-                            if (not thing) then return end
-                            if (speeddropdown["Value"] == "CFrame") then 
-                                connectionnnverus:Disconnect()
-                                return 
-                            end
-                            speed = 23
-                            wait(0.4)
-                            speed = speedvalueverus["Value"]
-                            wait(verusspeeddelay["Value"])
-                        until (not thing)
-                    end
-                end
-            else
-                if speeddropdown["Value"] == "CFrame" then
-                    conectthing:Disconnect()
-                    connectionnn:Disconnect()
-                elseif speeddropdown["Value"] == "Verus" then
-                    connectionnnverus:Disconnect()
-                    return
-                end
-            end
-        end
-    })
-    speedvalue = speedtog:CreateSlider({
-        ["Name"] = "SpeedValue",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 50,
-        ["Default"] = 45,
-        ["Round"] = 0
-    })
-    speeddropdown = speedtog:CreateDropDown({
-        ["Name"] = "SpeedMode",
-        ["Function"] = function() end,
-        ["List"] = {"CFrame", "Verus"},
-        ["Default"] = "CFrame"
-    })
-    speedvalueverus = speedtog:CreateSlider({
-        ["Name"] = "VerusSpeed",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 350,
-        ["Default"] = 80,
-        ["Round"] = 0
-    })
-    verusspeeddelay = speedtog:CreateSlider({
-        ["Name"] = "VerusTicks",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 1,
-        ["Default"] = 0.5,
-        ["Round"] = 1
-    })
-end
-
-local sprint = false
-Tabs["Movement"]:CreateToggle({
-    ["Name"] = "Sprint",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        sprint = v
-        if sprint then
-            spawn(function()
-                repeat
-                    wait()
-                    if (not sprint) then return end
-                    if sprintthingy.sprinting == false then
-                        sprintthingy:startSprinting()
-                    end
-                until (not sprint)
-            end)
-        else
-            sprintthingy:stopSprinting()
-        end
-    end
-})
-
-do
-    local highjump
-    local highjumpforce = {["Value"] = 20}
-    highjump = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "HighJump",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            local highjumpval = v
-            if highjumpval then
-                lplr.Character.Humanoid:ChangeState("Jumping")
-                task.wait()
-                workspace.Gravity = 5
-                spawn(function()
-                    for i = 1, highjumpforce["Value"] do
-                        wait()
-                        if (not highjumpval) then return end
-                        lplr.Character.Humanoid:ChangeState("Jumping")
-                    end
-                end)
-                spawn(function()
-                    for i = 1, highjumpforce["Value"] / 28 do
-                        task.wait(0.1)
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                        task.wait(0.1)
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                    end
-                end)
-                highjump:silentToggle()
-            else
-                workspace.Gravity = 196.19999694824
-                return
-            end
-        end
-    })
-    highjumpforce = highjump:CreateSlider({
-        ["Name"] = "Force",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 50,
-        ["Default"] = 25,
-        ["Round"] = 0
-    })
-end
-
-do
-    local longjumpval = false
-    local gravityval = {["Value"] = 0}
-    local longjumpdelay = {["Value"] = 0.1}
-    local lognjump = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "LongJump",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            longjumpval = v
-            if longjumpval then
-                workspace.Gravity = gravityval["Value"]
-                spawn(function()
-                    repeat
-                        if (not longjumpval) then return end
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Climbing)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
-                        wait(longjumpdelay["Value"])
-                    until (not longjumpval)
-                end)
-            else
-                workspace.Gravity = 196.19999694824
-                return
-            end
-        end
-    })
-    gravityval = lognjump:CreateSlider({
-        ["Name"] = "Gravity",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 10,
-        ["Default"] = 0,
-        ["Round"] = 0
-    })
-    longjumpdelay = lognjump:CreateSlider({
-        ["Name"] = "Delay",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 1,
-        ["Default"] = 0.1,
-        ["Round"] = 1
-    })
-end
-
---[[
-    local customlongjumpval = false
-    Tabs["Movement"]:CreateToggle({
-        ["Name"] = "CustomLongJump",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            customlongjumpval = v
-            if customlongjumpval then
-                spawn(function()
-                    repeat
-                        if (not customlongjumpval) then return end
-                        task.wait()
-                        if lplr.Character.Humanoid.Jump == true then
-                            if (not customlongjumpval) then return end
-                            lplr.Character.Humanoid.WalkSpeed = 15
-                            Workspace.Gravity = 23
-                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.2,-2.1) 
-                            wait(0.1)
-                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0,-0.5,-2.1) 
-                            wait(0.1)
-                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0.2 ,0) 
-                            wait(0.1)
-                        end
-                    until (not customlongjumpval)                
-                end)
-                spawn(function()
-                    repeat
-                        if (not customlongjumpval) then return end
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                        wait()
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                        wait()
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
-                        wait()
-                    until (not customlongjumpval)
-                end)
-            else
-                workspace.Gravity = 196.19999694824
-                return
-            end
-        end
-    })
-]]
-
---[[
-    local cloneval = false
-    local funiclonegodmodedisab
-    funiclonegodmodedisab = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "CloneGodmodeFullDisabler",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            cloneval = v
-            if cloneval then
-                spawn(function()
-                    isclone = true
-                    clonemake()
-                    speedd = 200
-                    connectionnnn = game:GetService("RunService").Heartbeat:connect(function()
-                        local velo = clone.Humanoid.MoveDirection * speedd
-                        clone.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                    end)
-                end)
-                repeat task.wait() until (matchState == 2)
-                funiclonegodmodedisab:Toggle()
-            else
-                clone:remove()
-                lplr.Character = realchar
-                realchar.Humanoid:ChangeState("Dead")
-                isclone = false
-                connectionnnn:Disconnect()
-                return
-            end
-        end
-    })
---]]
-
---[[
-    longjumpfuni = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "CannonLongJump",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            longjumpval = v
-            if longjumpval then
-                if game.Workspace.Map.Blocks:FindFirstChild("cannon") then
-                    spawn(function()
-                        repeat
-                            for i,v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
-                                if v.Name == "cannon" then
-                                    workspace.Gravity = 0
-                                    v.LaunchSelfPrompt.HoldDuration = 0
-                                    workspace.Gravity = 0
-                                    fireproximityprompt(v.LaunchSelfPrompt)
-                                    workspace.Gravity = 0
-                                end
-                            end
-                        wait()
-                        until (not longjumpval)   
-                    end)
-                    spawn(function()
-                        workspace.Gravity = 0
-                        wait(0.1)
-                        workspace.Gravity = 0
-                        wait(0.1)
-                        workspace.Gravity = 0
-                        wait(0.1)
-                        workspace.Gravity = 0
-                        wait(0.62)
-                        workspace.Gravity = 196.19999694824
-                    end)
-                    spawn(function()
-                        for i = 1, 4 do
-                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                            wait(0.1)
-                            lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                        end
-                    end)
-                    longjumpfuni:silentToggle()
-                end
-            else
-                workspace.Gravity = 196.19999694824
-                return
-            end
-        end
-    })
-]]
-
---[[
-    local flyenabled
-    Tabs["Movement"]:CreateToggle({
-        ["Name"] = "Fly",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            flyenabled = v
-            if flyenabled then
-                spawn(function()
-                    repeat
-                        task.wait()
-                        if clone then
-                            task.wait()
-                            workspace.Gravity = 1
-                            local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
-                            local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
-                            if SpaceHeld then
-                                clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0)
-                                task.wait()
-                            end
-                            if ShiftHeld then
-                                clone.HumanoidRootPart.CFrame = clone.HumanoidRootPart.CFrame * CFrame.new(0, -15, 0)
-                                task.wait()
-                            end
-                        else
-                            task.wait()
-                            workspace.Gravity = 1
-                            local SpaceHeld = uis:IsKeyDown(Enum.KeyCode.Space)
-                            local ShiftHeld = uis:IsKeyDown(Enum.KeyCode.LeftShift)
-                            if SpaceHeld then
-                                hrp.CFrame = hrp.CFrame * CFrame.new(0, 15, 0)
-                                task.wait()
-                            end
-                            if ShiftHeld then
-                                hrp.CFrame = hrp.CFrame * CFrame.new(0, -15, 0)
-                                task.wait()
-                            end
-                        end
-                    until (not flyenabled)
-                end)
-            else
-                conectthingylol:Disconnect()
-            end
-        end
-    })
-]]
-
--- RENDER
-
-function yesyesbed()
-    if lplr.leaderstats.Bed.Value ~= "✅" then
-        local sound = Instance.new("Sound")
-        sound.Parent = workspace
-        sound.SoundId = getasset("rektsky/sound/mc/bedbroken.mp3")
-        sound:Play()
-        wait(7)
-        sound:remove()
-    end
-end
-
-local requestfunc = syn and syn.request or http and http.request or http_request or fluxus and fluxus.request or request or function(tab)
-    if tab.Method == "GET" then
-        return {
-            Body = game:HttpGet(tab.Url, true),
-            Headers = {},
-            StatusCode = 200
-        }
-    else
-        return {
-            Body = "bad exploit",
-            Headers = {},
-            StatusCode = 404
-        }
-    end
-end 
-
-local betterisfile = function(file)
-    local suc, res = pcall(function() return readfile(file) end)
-    return suc and res ~= nil
-end
-
-local cachedassets = {}
-local function getcustomassetfunc(path)
-    if not betterisfile(path) then
-        spawn(function()
-            local textlabel = Instance.new("TextLabel")
-            textlabel.Size = UDim2.new(1, 0, 0, 36)
-            textlabel.Text = "Downloading "..path
-            textlabel.BackgroundTransparency = 1
-            textlabel.TextStrokeTransparency = 0
-            textlabel.TextSize = 30
-            textlabel.Font = Enum.Font.SourceSans
-            textlabel.TextColor3 = Color3.new(1, 1, 1)
-            textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = ScreenGuitwo
-            repeat wait() until betterisfile(path)
-            textlabel:Remove()
-        end)
-        local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/sound/mc", "sound/mc"),
-            Method = "GET"
-        })
-        writefile(path, req.Body)
-    end
-    if cachedassets[path] == nil then
-        cachedassets[path] = getasset(path) 
-    end
-    return cachedassets[path]
-end
-
-local cachedassetssds = {}
-local function getcustomassetthingylol(path)
-    if not betterisfile(path) then
-        spawn(function()
-            local textlabel = Instance.new("TextLabel")
-            textlabel.Size = UDim2.new(1, 0, 0, 36)
-            textlabel.Text = "Downloading "..path
-            textlabel.BackgroundTransparency = 1
-            textlabel.TextStrokeTransparency = 0
-            textlabel.TextSize = 30
-            textlabel.Font = Enum.Font.SourceSans
-            textlabel.TextColor3 = Color3.new(1, 1, 1)
-            textlabel.Position = UDim2.new(0, 0, 0, -36)
-            textlabel.Parent = ScreenGuitwo
-            repeat wait() until betterisfile(path)
-            textlabel:Remove()
-        end)
-        local req = requestfunc({
-            Url = "https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/"..path:gsub("rektsky/assets", "assets"),
-            Method = "GET"
-        })
-        writefile(path, req.Body)
-    end
-    if cachedassetssds[path] == nil then
-        cachedassetssds[path] = getasset(path) 
-    end
-    return cachedassetssds[path]
-end
-
-local gamesound = require(game:GetService("ReplicatedStorage").TS.sound["game-sound"]).GameSound
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "MCSounds",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        getgenv().mcsounds = v
-        if getgenv().mcsounds then
-            spawn(function()
-                lplr.leaderstats.Bed:GetPropertyChangedSignal("Value"):Connect(yesyesbed)
-            end)
-            spawn(function()
-                Client:WaitFor("BedwarsBedBreak"):andThen(function(p13)
-                    p13:Connect(function(p14)
-                        local sound = Instance.new("Sound")
-                        sound.Parent = workspace
-                        sound.SoundId = getcustomassetfunc("rektsky/sound/mc/bedbreak.mp3")
-                        sound:Play()
-                        wait(4)
-                        sound:remove()
-                    end)
-                end)
-            end)
-            local oldsounds = gamesound
-            local newsounds = gamesound
-            newsounds.UI_CLICK = "rbxassetid://535716488"
-            newsounds.PICKUP_ITEM_DROP = getcustomassetfunc("rektsky/sound/mc/pickup.mp3")
-            newsounds.KILL = "rbxassetid://1053296915"
-            newsounds.ERROR_NOTIFICATION = ""
-            newsounds.DAMAGE_1 = "rbxassetid://6361963422"
-            newsounds.DAMAGE = "rbxassetid://6361963422"
-            newsounds.DAMAGE_2 = "rbxassetid://6361963422"
-            newsounds.DAMAGE_3 = "rbxassetid://6361963422"
-            newsounds.SWORD_SWING_1 = ""
-            newsounds.SWORD_SWING_2 = ""
-            newsounds.BEDWARS_PURCHASE_ITEM = getcustomassetfunc("rektsky/sound/mc/buyitem.mp3")
-            newsounds.STATIC_HIT = "rbxassetid://6361963422"
-            newsounds.STONE_BREAK = "rbxassetid://6496157434"
-            newsounds.WOOL_BREAK = getcustomassetfunc("rektsky/sound/mc/woolbreak.mp3")
-            newsounds.WOOD_BREAK = getcustomassetfunc("rektsky/sound/mc/breakwood.mp3")
-            newsounds.GLASS_BREAK = getcustomassetfunc("rektsky/sound/mc/glassbreak.mp3")
-            newsounds.TNT_HISS_1 = getcustomassetfunc("rektsky/sound/mc/tnthiss.mp3")
-            newsounds.TNT_EXPLODE_1 = getcustomassetfunc("rektsky/sound/mc/tntexplode.mp3")
-            gamesound = newsounds
-        else
-            gamesound = oldsounds
-        end
-    end
-})
-
-local function Cape(char, texture)
-    for i,v in pairs(char:GetDescendants()) do
-        if v.Name == "Cape" then
-            v:Remove()
-        end
-    end
-            local hum = char:WaitForChild("Humanoid")
-            local torso = nil
-            if hum.RigType == Enum.HumanoidRigType.R15 then
-            torso = char:WaitForChild("UpperTorso")
-            else
-            torso = char:WaitForChild("Torso")
-            end
-            local p = Instance.new("Part", torso.Parent)
-            p.Name = "Cape"
-            p.Anchored = false
-            p.CanCollide = false
-            p.TopSurface = 0
-            p.BottomSurface = 0
-            p.FormFactor = "Custom"
-            p.Size = Vector3.new(0.2,0.2,0.2)
-            p.Transparency = 1
-            local decal = Instance.new("Decal", p)
-            decal.Texture = texture
-            decal.Face = "Back"
-            local msh = Instance.new("BlockMesh", p)
-            msh.Scale = Vector3.new(9,17.5,0.5)
-            local motor = Instance.new("Motor", p)
-            motor.Part0 = p
-            motor.Part1 = torso
-            motor.MaxVelocity = 0.01
-            motor.C0 = CFrame.new(0,2,0) * CFrame.Angles(0,math.rad(90),0)
-            motor.C1 = CFrame.new(0,1,0.45) * CFrame.Angles(0,math.rad(90),0)
-            local wave = false
-            repeat wait(1/44)
-                decal.Transparency = torso.Transparency
-                local ang = 0.1
-                local oldmag = torso.Velocity.magnitude
-                local mv = 0.002
-                if wave then
-                    ang = ang + ((torso.Velocity.magnitude/10) * 0.05) + 0.05
-                    wave = false
-                else
-                    wave = true
-                end
-                ang = ang + math.min(torso.Velocity.magnitude/11, 0.5)
-                motor.MaxVelocity = math.min((torso.Velocity.magnitude/111), 0.04) --+ mv
-                motor.DesiredAngle = -ang
-                if motor.CurrentAngle < -0.2 and motor.DesiredAngle > -0.2 then
-                    motor.MaxVelocity = 0.04
-                end
-                repeat wait() until motor.CurrentAngle == motor.DesiredAngle or math.abs(torso.Velocity.magnitude - oldmag) >= (torso.Velocity.magnitude/10) + 1
-                if torso.Velocity.magnitude < 0.1 then
-                    wait(0.1)
-                end
-            until not p or p.Parent ~= torso.Parent
-end
-
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "Cape",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v and entity.isAlive then
-            Cape(game.Players.LocalPlayer.Character, getcustomassetthingylol("rektsky/cape.png"))
-        else
-            Cape(game.Players.LocalPlayer.Character, nil)
-        end
-    end
-})
-
-local colorbox
-local function makeRainbowText(text)
-    spawn(function()
-        colorbox = Color3.fromRGB(170,0,170)
-        local x = 0
-        while wait() do
-            colorbox = Color3.fromHSV(x,1,1)
-            x = x + 4.5/255
-            if x >= 1 then
-                x = 0
-            end
-        end
-    end)
-    spawn(function()
-        repeat
-            wait()
-            text.TextColor3 = colorbox
-        until true == false
-    end)
-end
-
-local function makeRainbowFrame(frame)
-    spawn(function()
-        repeat
-            wait()
-            frame.BackgroundColor3 = colorbox
-        until true == false
-    end)
-end
-
-local ESPFolder
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "ESP",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        local thing
-        local espval = v
-        if espval then
-            spawn(function()
-                ESPFolder = Instance.new("Folder")
-                ESPFolder.Name = "ESPFolder"
-                ESPFolder.Parent = ScreenGuitwo
-                repeat
-                    task.wait()
-                    if (not espval) then break end
-                    for i,plr in pairs(game.Players:GetChildren()) do
-                        if ESPFolder:FindFirstChild(plr.Name) then
-                            thing = ESPFolder[plr.Name]
-                            thing.Visible = false
-                        else
-                            thing = Instance.new("ImageLabel")
-                            thing.BackgroundTransparency = 1
-                            thing.BorderSizePixel = 0
-                            thing.Image = getcustomassetthingylol("rektsky/assets/esppic.png")
-                            thing.Visible = false
-                            thing.Name = plr.Name
-                            thing.Parent = ESPFolder
-                            thing.Size = UDim2.new(0, 256, 0, 256)
-                        end
-                        
-                        if isAlive(plr) and plr ~= lplr and plr.Team ~= tostring(lplr.Team) then
-                            local rootPos, rootVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
-                            local rootSize = (plr.Character.HumanoidRootPart.Size.X * 1200) * (cam.ViewportSize.X / 1920)
-                            local headPos, headVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position + Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
-                            local legPos, legVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position - Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
-                            rootPos = rootPos
-                            if rootVis then
-                                thing.Visible = rootVis
-                                thing.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
-                                thing.Position = UDim2.new(0, rootPos.X - thing.Size.X.Offset / 2, 0, (rootPos.Y - thing.Size.Y.Offset / 2) - 36)
-                            end
-                        end
-                    end
-                until (not espval)
-            end)
-            game.Players.PlayerRemoving:connect(function(plr)
-                if ESPFolder:FindFirstChild(plr.Name) then
-                    ESPFolder[plr.Name]:Remove()
-                end
-            end)
-        else
-            ESPFolder:remove()
-            return
-        end
-    end
-})
-
-local screngiu
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "WaterMarks",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if entity.isAlive then
-            if v then
-                screngiu = Instance.new("ScreenGui")
-                local Frame = Instance.new("Frame")
-                local UICorner = Instance.new("UICorner")
-                local ImageLabel = Instance.new("ImageLabel")
-                local TextLabel = Instance.new("TextLabel")
-                screngiu.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-                screngiu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-                Frame.Parent = screngiu
-                Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                Frame.BackgroundTransparency = 0.400
-                Frame.Position = UDim2.new(0.0163636357, 0, 0.0343558267, 0)
-                Frame.Size = UDim2.new(0, 149, 0, 149)
-                UICorner.CornerRadius = UDim.new(0, 9)
-                UICorner.Parent = Frame
-                ImageLabel.Parent = Frame
-                ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                ImageLabel.BackgroundTransparency = 1.000
-                ImageLabel.Position = UDim2.new(0.137143791, 0, 0.0700296983, 0)
-                ImageLabel.Size = UDim2.new(0, 108, 0, 108)
-                ImageLabel.Image = getcustomassetthingylol("rektsky/assets/icon.png")
-                TextLabel.Parent = Frame
-                TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                TextLabel.BackgroundTransparency = 1.000
-                TextLabel.BorderSizePixel = 0
-                TextLabel.Position = UDim2.new(0.0402684584, 0, 0.798657715, 0)
-                TextLabel.Size = UDim2.new(0, 132, 0, 30)
-                TextLabel.Font = Enum.Font.SourceSansLight
-                TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                TextLabel.TextScaled = true
-                TextLabel.TextSize = 14.000
-                TextLabel.TextWrapped = true
-                TextLabel.Text = "RektSky B4 Public"
-                makeRainbowText(TextLabel, true)
-            else
-                makeRainbowText(TextLabel, false)
-                screngiu:Destroy()
-                return
-            end
-        end
-    end
-})
-
---[[
-local ScreenGuie
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "KeyStrokes",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        local keystrokesval = v
-        if keystrokesval then
-            local ScreenGuie = Instance.new("ScreenGui")
-            local WKey = Instance.new("Frame")
-            local UICorner = Instance.new("UICorner")
-            local TextLabel = Instance.new("TextLabel")
-            local SKey = Instance.new("Frame")
-            local UICorner_2 = Instance.new("UICorner")
-            local TextLabel_2 = Instance.new("TextLabel")
-            local AKey = Instance.new("Frame")
-            local UICorner_3 = Instance.new("UICorner")
-            local TextLabel_3 = Instance.new("TextLabel")
-            local DKey = Instance.new("Frame")
-            local UICorner_4 = Instance.new("UICorner")
-            local TextLabel_4 = Instance.new("TextLabel")
-            local LMB = Instance.new("Frame")
-            local UICorner_5 = Instance.new("UICorner")
-            local TextLabel_5 = Instance.new("TextLabel")
-            local RMB = Instance.new("Frame")
-            local UICorner_6 = Instance.new("UICorner")
-            local TextLabel_6 = Instance.new("TextLabel")
-            
-            --Properties:
-            
-            ScreenGuie.Parent = game.CoreGui
-            
-            WKey.Name = "WKey"
-            WKey.Parent = ScreenGuie
-            WKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            WKey.BackgroundTransparency = 0.300
-            WKey.Position = UDim2.new(0.0412545539, 0, 0.218990266, 0)
-            WKey.Size = UDim2.new(0, 58, 0, 56)
-            
-            UICorner.CornerRadius = UDim.new(0, 9)
-            UICorner.Parent = WKey
-            
-            TextLabel.Parent = WKey
-            TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel.BackgroundTransparency = 1.000
-            TextLabel.BorderSizePixel = 0
-            TextLabel.Position = UDim2.new(7.82310963e-08, 0, 9.87201929e-08, 0)
-            TextLabel.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel.Font = Enum.Font.SourceSansLight
-            TextLabel.Text = "W"
-            TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel.TextSize = 30.000
-            
-            SKey.Name = "SKey"
-            SKey.Parent = ScreenGuie
-            SKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            SKey.BackgroundTransparency = 0.300
-            SKey.Position = UDim2.new(0.0408016965, 0, 0.301259696, 0)
-            SKey.Selectable = true
-            SKey.Size = UDim2.new(0, 61, 0, 56)
-            
-            UICorner_2.CornerRadius = UDim.new(0, 9)
-            UICorner_2.Parent = SKey
-            
-            TextLabel_2.Parent = SKey
-            TextLabel_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_2.BackgroundTransparency = 1.000
-            TextLabel_2.BorderSizePixel = 0
-            TextLabel_2.Position = UDim2.new(0.0409834981, 0, -2.38418579e-07, 0)
-            TextLabel_2.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel_2.Font = Enum.Font.SourceSansLight
-            TextLabel_2.Text = "S"
-            TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_2.TextSize = 30.000
-            
-            AKey.Name = "AKey"
-            AKey.Parent = ScreenGuie
-            AKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            AKey.BackgroundTransparency = 0.300
-            AKey.Position = UDim2.new(0.0046426258, 0, 0.301259696, 0)
-            AKey.Selectable = true
-            AKey.Size = UDim2.new(0, 58, 0, 56)
-            
-            UICorner_3.CornerRadius = UDim.new(0, 9)
-            UICorner_3.Parent = AKey
-            
-            TextLabel_3.Parent = AKey
-            TextLabel_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_3.BackgroundTransparency = 1.000
-            TextLabel_3.BorderSizePixel = 0
-            TextLabel_3.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel_3.Font = Enum.Font.SourceSansLight
-            TextLabel_3.Text = "A"
-            TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_3.TextSize = 30.000
-            
-            DKey.Name = "DKey"
-            DKey.Parent = ScreenGuie
-            DKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            DKey.BackgroundTransparency = 0.300
-            DKey.Position = UDim2.new(0.0777207837, 0, 0.301259696, 0)
-            DKey.Selectable = true
-            DKey.Size = UDim2.new(0, 58, 0, 56)
-            
-            UICorner_4.CornerRadius = UDim.new(0, 9)
-            UICorner_4.Parent = DKey
-            
-            TextLabel_4.Parent = DKey
-            TextLabel_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_4.BackgroundTransparency = 1.000
-            TextLabel_4.BorderSizePixel = 0
-            TextLabel_4.Position = UDim2.new(-1.1920929e-07, 0, 0, 0)
-            TextLabel_4.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel_4.Font = Enum.Font.SourceSansLight
-            TextLabel_4.Text = "D"
-            TextLabel_4.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_4.TextSize = 30.000
-            
-            LMB.Name = "LMB"
-            LMB.Parent = ScreenGuie
-            LMB.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            LMB.BackgroundTransparency = 0.300
-            LMB.Position = UDim2.new(0.00477237254, 0, 0.386007428, 0)
-            LMB.Selectable = true
-            LMB.Size = UDim2.new(0, 90, 0, 56)
-            
-            UICorner_5.CornerRadius = UDim.new(0, 9)
-            UICorner_5.Parent = LMB
-            
-            TextLabel_5.Parent = LMB
-            TextLabel_5.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_5.BackgroundTransparency = 1.000
-            TextLabel_5.BorderSizePixel = 0
-            TextLabel_5.Position = UDim2.new(0.174026534, 0, 0, 0)
-            TextLabel_5.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel_5.Font = Enum.Font.SourceSansLight
-            TextLabel_5.Text = "LMB"
-            TextLabel_5.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_5.TextSize = 30.000
-            
-            RMB.Name = "RMB"
-            RMB.Parent = ScreenGuie
-            RMB.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            RMB.BackgroundTransparency = 0.300
-            RMB.Position = UDim2.new(0.062555559, 0, 0.386007428, 0)
-            RMB.Selectable = true
-            RMB.Size = UDim2.new(0, 87, 0, 56)
-            
-            UICorner_6.CornerRadius = UDim.new(0, 9)
-            UICorner_6.Parent = RMB
-            
-            TextLabel_6.Parent = RMB
-            TextLabel_6.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_6.BackgroundTransparency = 1.000
-            TextLabel_6.BorderSizePixel = 0
-            TextLabel_6.Position = UDim2.new(0.163681686, 0, 0, 0)
-            TextLabel_6.Size = UDim2.new(0, 58, 0, 56)
-            TextLabel_6.Font = Enum.Font.SourceSansLight
-            TextLabel_6.Text = "RMB"
-            TextLabel_6.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel_6.TextSize = 30.000
-            spawn(function()
-                repeat
-                    wait()
-                    if uis:IsKeyDown(Enum.KeyCode.A) then
-                        AKey.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        TextLabel_3.TextColor3 = Color3.fromRGB(0, 0, 0)
-                    else
-                        AKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                        TextLabel_3.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                    if uis:IsKeyDown(Enum.KeyCode.D) then
-                        DKey.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        TextLabel_4.TextColor3 = Color3.fromRGB(0, 0, 0)
-                    else
-                        DKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                        TextLabel_4.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                    if uis:IsKeyDown(Enum.KeyCode.W) then
-                        WKey.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-                    else
-                        WKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                        TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                    if uis:IsKeyDown(Enum.KeyCode.S) then
-                        SKey.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        TextLabel_2.TextColor3 = Color3.fromRGB(0, 0, 0)
-                    else
-                        SKey.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                        TextLabel_2.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                    uis.InputBegan:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            LMB.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                            TextLabel_5.TextColor3 = Color3.fromRGB(0, 0, 0)
-                        end
-                        if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                            RMB.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                            TextLabel_6.TextColor3 = Color3.fromRGB(0, 0, 0)
-                        end
-                    end)
-                    uis.InputEnded:Connect(function(input)
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            LMB.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                            TextLabel_5.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        end
-                        if input.UserInputType == Enum.UserInputType.MouseButton2 then
-                            RMB.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                            TextLabel_6.TextColor3 = Color3.fromRGB(255, 255, 255)
-                        end
-                    end)
-                until (not keystrokesval)
-            end)
-        else
-            ScreenGuie:Destroy()
-        end
-    end
-})
--- ]]
-
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "Night",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v then
-            game.Lighting.TimeOfDay = "00:00:00"
-        else
-            game.Lighting.TimeOfDay = "13:00:00"
-        end
-    end
-})
-
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "RektskyAmbience",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v then
-            game.Lighting.Ambient = Color3.fromRGB(0, 255, 255)
-            game.Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
-        else
-            game.Lighting.Ambient = Color3.fromRGB(91, 91, 91)
-            game.Lighting.OutdoorAmbient = Color3.fromRGB(201, 201, 201)
-        end
-    end
-})
-
-local chinahattrail
-local chinahatenabled = false
-Tabs["Render"]:CreateToggle({
-    ["Name"] = "ChinaHat",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        chinahatenabled = v
-        if chinahatenabled then
-			spawn(function()
-                repeat
-                    task.wait(0.3)
-                    if (not chinahatenabled) then return end
-                    if entity.isAlive then
-                        if chinahattrail == nil or chinahattrail.Parent == nil then
-                            chinahattrail = Instance.new("Part")
-                            chinahattrail.CFrame = lplr.Character.Head.CFrame * CFrame.new(0, 1.1, 0)
-                            chinahattrail.Size = Vector3.new(3, 0.7, 3)
-                            chinahattrail.Name = "ChinaHat"
-                            chinahattrail.Material = Enum.Material.Neon
-                            chinahattrail.CanCollide = false
-                            chinahattrail.Transparency = 0.3
-                            local chinahatmesh = Instance.new("SpecialMesh")
-                            chinahatmesh.Parent = chinahattrail
-                            chinahatmesh.MeshType = "FileMesh"
-                            chinahatmesh.MeshId = "http://www.roblox.com/asset/?id=1778999"
-                            chinahatmesh.Scale = Vector3.new(3, 0.6, 3)
-                            local chinahatweld = Instance.new("WeldConstraint")
-                            chinahatweld.Name = "WeldConstraint"
-                            chinahatweld.Parent = chinahattrail
-                            chinahatweld.Part0 = lplr.Character.Head
-                            chinahatweld.Part1 = chinahattrail
-                            chinahattrail.Parent = workspace.Camera
-                        else
-                            chinahattrail.Parent = workspace.Camera
-                            chinahattrail.CFrame = lplr.Character.Head.CFrame * CFrame.new(0, 1.1, 0)
-                            chinahattrail.LocalTransparencyModifier = ((cam.CFrame.Position - cam.Focus.Position).Magnitude <= 0.6 and 1 or 0)
-                            if chinahattrail:FindFirstChild("WeldConstraint") then
-                                chinahattrail.WeldConstraint.Part0 = lplr.Character.Head
-                            end
-                        end
-                    else
-                        if chinahattrail then 
-                            chinahattrail:remove()
-                            chinahattrail = nil
-                        end
-                    end
-                until (not chinahatenabled)
-            end)
-        else
-            if chinahattrail then
-                chinahattrail:Remove()
-                chinahattrail = nil
-            end
-        end
-    end
-})
-
--- EXPLOITS
-
-function yesoksussybed()
-    if lplr.leaderstats.Bed.Value ~= "✅" then
-        game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Who ever broke my bed, i have your location", 'All')
-    end
-end
-
-Tabs["Exploits"]:CreateToggle({
-    ["Name"] = "Insults",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        getgenv().autotoxicval = v
-        spawn(function()  
-            Client:WaitFor("EntityDeathEvent"):andThen(function(p6)
-                p6:Connect(function(p7)
-                    if p7.fromEntity == lplr.Character then
-                        if not getgenv().autotoxicval then return end
-                        if getgenv().autotoxicval then
-                            local susplr = game.Players:GetPlayerFromCharacter(p7.entityInstance)
-                            local toxicmessages = {"Hey, "..susplr.Name..", you should really get RektSky, one of the best gaming chairs! thank me later!!", "Dude you're awfull at this game get better "..susplr.Name.."!", susplr.Name.." you don't get it, you nedd to TURN ON kill aura velocity speed and all that stuff you dumb", "well, "..susplr.Name..", that was the LITERAL easiest kill, RektSky got a nice gaming chair", "try harder "..susplr.Name..", you're so bad", "cope "..susplr.Name, "omg guys vbedwar haker!!!11", "get better noob "..susplr.Name, "me when the "..susplr.Name.." is sus", "me when the "..susplr.Name.." is so sussy", "RektSky is just great!", "ez "..susplr.Name, "L "..susplr.Name, "Bow to me noob, slave "..susplr.Name, "rektsky = best", "me when the rektsky", "omg!!11& bedwar haker!111 hE IS HACIGN OMG SOTP HACKING "..susplr.Name, "shoutout to my boi "..susplr.Name}
-                            local randomtoxicmessage = toxicmessages[math.random(1,#toxicmessages)]
-                            if last ~= randomtoxicmessage and secondlast ~= randomtoxicmessage and thirdlast ~= randomtoxicmessage then
-                                game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(randomtoxicmessage, 'All')
-                                thirdlast = secondlast
-                                secondlast = last
-                                last = randomtoxicmessage
-                            else
-                                local susplr = game.Players:GetPlayerFromCharacter(p7.entityInstance)
-                                local toxicmessages = {"Hey, "..susplr.Name..", you should really get RektSky, one of the best gaming chairs! thank me later!!", "Dude you're awfull at this game get better "..susplr.Name.."!", susplr.Name.." you don't get it, you nedd to TURN ON kill aura velocity speed and all that stuff you dumb", "well, "..susplr.Name..", that was the LITERAL easiest kill, RektSky got a nice gaming chair", "try harder "..susplr.Name..", you're so bad", "cope "..susplr.Name, "omg guys vbedwar haker!!!11", "get better noob "..susplr.Name, "me when the "..susplr.Name.." is sus", "me when the "..susplr.Name.." is so sussy", "RektSky is just great!", "ez "..susplr.Name, "L "..susplr.Name, "Bow to me noob, slave "..susplr.Name, "rektsky = best", "me when the rektsky", "omg!!11& bedwar haker!111 hE IS HACIGN OMG SOTP HACKING "..susplr.Name, "shoutout to my boi "..susplr.Name}
-                                local randomtoxicmessage = toxicmessages[math.random(1,#toxicmessages)]
-                                if last ~= randomtoxicmessage and secondlast ~= randomtoxicmessage and thirdlast ~= randomtoxicmessage then
-                                    game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(randomtoxicmessage, 'All')
-                                    thirdlast = secondlast
-                                    secondlast = last
-                                    last = randomtoxicmessage
-                                end
-                            end
-                        end
-                    end
-                end)        
-            end)
-        end)
-        spawn(function()
-            getgenv().valspeed = v
-            if getgenv().valspeed then
-                spawn(function()
-                    Client:WaitFor("BedwarsBedBreak"):andThen(function(p13)
-                        p13:Connect(function(p14)
-                            if p14.player.UserId == lplr.UserId then
-                                local team = queuemeta[clntstorehandlr:getState().Game.queueType or "bedwars_test"].teams[tonumber(p14.brokenBedTeam.id)]
-                                local teamname = team and team.displayName:lower() or "white"
-                                game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("yooo cool bed "..teamname.." :)", 'All')
-                            end
-                        end)
-                    end)
-                end)
-            end
-        end)
-        spawn(function()
-            lplr.leaderstats.Bed:GetPropertyChangedSignal("Value"):Connect(yesoksussybed)
-        end)
-    end
-})
-
-local shopthingyshopshop = debug.getupvalue(require(game:GetService("ReplicatedStorage").TS.games.bedwars.shop["bedwars-shop"]).BedwarsShop.getShopItem, 2)
-local oldnexttier
-local oldtiered
-local bypassstpidshoptiers = false
-Tabs["Exploits"]:CreateToggle({
-    ["Name"] = "BypassShopTiers",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if (bypassstpidshoptiers) then
-            for i,v in pairs(shopthingyshopshop) do
-                oldtiered = oldtiered or v.tiered
-                oldnexttier = oldnexttier or v.nextTier
-            end
-            for i,v in pairs(shopthingyshopshop) do
-                v.tiered = nil
-                v.nextTier = nil
-            end
-        else
-            for i,v in pairs(shopthingyshopshop) do
-                v.tiered = oldtiered
-                v.nextTier = oldnexttier
-            end
-        end
-    end
-})
-
---[[local breakallbedsthing
-breakallbedsthing = Tabs["Exploits"]:CreateToggle({
-    ["Name"] = "BreakAllBeds",
-    ["Keybind"] = nil,
-    ["Callback"] = function(va)
-        local amogusvalue = va
-        if amogusvalue then
-            pcall(function()
-                for i = 1,15 do
-                    for i, v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
-                        if v.Name == "bed" then
-                            game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                ["invisibleLandmine"] = v                    
-                            })
-                        end
-                    end
-                end
-            end)
-            breakallbedsthing:silentToggle()
-        end
-    end
-})
-
-local funikickallthingy
-funikickallthingy = Tabs["Exploits"]:CreateToggle({
-    ["Name"] = "FunnyKickAll",
-    ["Keybind"] = nil,
-    ["Callback"] = function(va)
-        local amogussvalue = va
-        if amogussvalue then
-            pcall(function()
-                for i = 1,15 do
-                    for i, v in pairs(game.Players:GetChildren()) do
-                        if v ~= lplr then
-                            if v.Character:FindFirstChild("Head") then
-                                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                    ["invisibleLandmine"] = v.Character.Head                        
-                                })
-                            end
-                        end
-                    end
-                end
-            end)
-            funikickallthingy:silentToggle()
-        end
-    end
-})
-
-local funikillallthingy
-funikillallthingy = Tabs["Exploits"]:CreateToggle({
-    ["Name"] = "MovementDisabler",
-    ["Keybind"] = nil,
-    ["Callback"] = function(va)
-        local amogusssvalue = va
-        if amogusssvalue then
-            pcall(function()
-                for i = 1,15 do
-                    for i, v in pairs(game.Players:GetChildren()) do
-                        if v ~= lplr then
-                            if v.Character.HumanoidRootPart then
-                                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                                    ["invisibleLandmine"] = v                        
-                                })
-                            end
-                        end
-                    end
-                end
-            end)
-            funikillallthingy:silentToggle()
-        end
-    end
-})--]]
-
--- PLAYER
-
-Tabs["Player"]:CreateToggle({
-    ["Name"] = "NoFall",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if entity.isAlive then
-            spawn(function()
-                repeat
-                    if v == false then return end
-                    wait(0.5)
-                    game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.GroundHit:FireServer(workspace.Map.Blocks,1645488277.345853)
-                until v == false
-            end)
-        end
-    end
-})
-
-local antivoidpart
-Tabs["Player"]:CreateToggle({
-    ["Name"] = "AntiVoid",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v then
-            local antivoidpart = Instance.new("Part", Workspace)
-            antivoidpart.Name = "AntiVoid"
-            antivoidpart.Size = Vector3.new(2100, 0.5, 2000)
-            antivoidpart.Position = Vector3.new(160.5, 25, 247.5)
-            antivoidpart.Transparency = 0.4
-            antivoidpart.Anchored = true
-            antivoidpart.Touched:connect(function(dumbcocks)
-                if dumbcocks.Parent:WaitForChild("Humanoid") and dumbcocks.Parent.Name == lplr.Name then
-                    game.Players.LocalPlayer.Character.Humanoid:ChangeState("Jumping")
-                    wait(0.2)
-                    game.Players.LocalPlayer.Character.Humanoid:ChangeState("Jumping")
-                    wait(0.2)
-                    game.Players.LocalPlayer.Character.Humanoid:ChangeState("Jumping")
-                end
-            end)
-        else
-            game.Workspace.AntiVoid:remove()
-        end
-    end
-})
-
-function stealcheststrollage()
-    for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
-        if v.Name == "chest" then
-            if v:FindFirstChild("ChestFolderValue") then
-                local mag = (hrp.Position - v.Position).Magnitude
-                if mag <= 45 then
-                    for k,b in pairs(v.ChestFolderValue.Value:GetChildren()) do
-                        if b.Name ~= "ChestOwner" then
-                            game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged["Inventory:ChestGetItem"]:InvokeServer(v.ChestFolderValue.Value,b)
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
-Tabs["Player"]:CreateToggle({
-    ["Name"] = "ChestStealer",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if entity.isAlive then
-            repeat
-                stealcheststrollage()
-                wait()
-            until v == false
-        end
-    end
-})
-
--- REKTSKY
-
-local spammer = false
-Tabs["Rektsky"]:CreateToggle({
-    ["Name"] = "ChatSpammer",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        spammer = v
-        if spammer then
-            spawn(function()
-                repeat
-                    if (not spammer) then return end
-                    game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("when the rektsky is sus", 'All')
-                    wait(2)
-                until (not spammer)
-            end)
-        end
-    end
-})
-
-do
-    local sayinchat = {["Value"] = false}
-    local notificationsenabled = {["Value"] = true}
-    local autoreport = false
-    local autoreportthingy = Tabs["Rektsky"]:CreateToggle({
-        ["Name"] = "AutoReport",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            autoreport = v
-            if autoreport then
-                local reporttable = {
-                    ["ez"] = "Bullying",
-                    ["gay"] = "Bullying",
-                    ["gae"] = "Bullying",
-                    ["hacks"] = "Scamming",
-                    ["hacker"] = "Scamming",
-                    ["hack"] = "Scamming",
-                    ["cheat"] = "Scamming",
-                    ["hecker"] = "Scamming",
-                    ["get a life"] = "Bullying",
-                    ["L"] = "Bullying",
-                    ["thuck"] = "Swearing",
-                    ["thuc"] = "Swearing",
-                    ["thuk"] = "Swearing",
-                    ["fatherless"] = "Bullying",
-                    ["yt"] = "Offsite Links",
-                    ["discord"] = "Offsite Links",
-                    ["dizcourde"] = "Offsite Links",
-                    ["retard"] = "Swearing",
-                    ["tiktok"] = "Offsite Links",
-                    ["bad"] = "Bullying",
-                    ["trash"] = "Bullying",
-                    ["die"] = "Bullying",
-                    ["lobby"] = "Bullying",
-                    ["ban"] = "Bullying",
-                    ["youtube"] = "Offsite Links",
-                    ["im hacking"] = "Cheating/Exploiting",
-                    ["I'm hacking"] = "Cheating/Exploiting",
-                    ["download"] = "Offsite Links",
-                    ["kill your"] = "Bullying",
-                    ["kys"] = "Bullying",
-                    ["hack to win"] = "Bullying",
-                    ["bozo"] = "Bullying",
-                    ["kid"] = "Bullying",
-                    ["adopted"] = "Bullying",
-                    ["vxpe"] = "Cheating/Exploiting",
-                    ["futureclient"] = "Cheating/Exploiting",
-                    ["nova6"] = "Cheating/Exploiting",
-                    [".gg"] = "Offsite Links",
-                    ["gg"] = "Offsite Links",
-                    ["lol"] = "Bullying",
-                    ["suck"] = "Dating",
-                    ["love"] = "Dating",
-                    ["fuck"] = "Swearing",
-                    ["sthu"] = "Swearing",
-                    ["i hack"] = "Cheating/Exploiting",
-                    ["disco"] = "Offsite Links",
-                    ["dc"] = "Offsite Links"
-                }
-                function getreport(msg)
-                    for i,v in pairs(reporttable) do 
-                        if msg:lower():find(i) then 
-                            return v
-                        end
-                    end
-                    return nil
-                end
-                for i, v in pairs(game.Players:GetPlayers()) do
-                    if v.Name ~= lplr.Name then
-                        v.Chatted:connect(function(msg)
-                            local reportfound = getreport(msg)
-                            if reportfound then
-                                if sayinchat["Value"] then
-                                    game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Reported " .. v.Name .. " for " .. reportfound, 'All')
-                                end
-                                game.Players:ReportAbuse(v, reportfound, 'He said "' .. msg .. '", was very offensive to me')
-                                if notificationsenabled["Value"] then
-                                    createnotification("Reported" .. v.Name, "for saying " .. msg, 5, true)
-                                end
-                            end
-                        end)
-                    end
-                end
-            end
-        end
-    })
-    sayinchat = autoreportthingy:CreateOptionTog({
-        ["Name"] = "Say reports in chat",
-        ["Default"] = false,
-        ["Func"] = function() end
-    })
-    notificationsenabled = autoreportthingy:CreateOptionTog({
-        ["Name"] = "Notifications",
-        ["Default"] = true,
-        ["Func"] = function() end
-    })
-end
-
---[[
-    local hackdetector = false
-    Tabs["Rektsky"]:CreateToggle({
-        ["Name"] = "HackerDetector",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            hackdetector = v
-            if hackdetector then
-                repeat task.wait() until (matchState == 2)
-                spawn(function()
-                    repeat
-                        task.wait()
-                        if (not hackdetector) then return end
-                        for i, v in pairs(game.Players:GetChildren()) do
-                            if v:FindFirstChild("HumanoidRootPart") then
-                                local oldpos = v.Character.HumanoidRootPart.Position
-                                task.wait(0.5)
-                                local newpos = Vector3.new(v.Character.HumanoidRootPart.Position.X, 0, v.Character.HumanoidRootPart.Position.Z)
-                                local realnewpos = math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude) * 2
-                                if realnewpos > 32 then
-                                    game:GetService("StarterGui"):SetCore("SendNotification", {
-                                        Title = v.Name.." is cheating",
-                                        Text = tostring(math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude)),
-                                        Duration = 5,
-                                    })
-                                end
-                            end
-                        end
-                    until (not hackdetector)
-                end)
-            end
-        end
-    })
-]]
-
---[[
-    do
-        local rainbowenab = {["Value"] = false}
-        local rainbowspeed = {["Value"] = 4.5}
-        local clcickgui = Tabs["Rektsky"]:CreateToggle({
-            ["Name"] = "ClickGui",
-            ["Keybind"] = nil,
-            ["Callback"] = function(v) end
-        })
-
-        clcickgui:CreateOptionTog({
-            ["Name"] = "Rainbow",
-            ["Func"] = function(val) 
-                lib["Rainbow"] = val 
-            end
-        })
-
-        clcickgui:CreateSlider({
-            ["Name"] = "RainbowSpeed",
-            ["Function"] = function() end,
-            ["Min"] = 1,
-            ["Max"] = 20,
-            ["Default"] = 4.5,
-            ["Round"] = 1
-        })
-    end
-]]
-
---[[
-Tabs["Rektsky"]:CreateToggle({
-    ["Name"] = "FunnyArrayListTroll",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        amongus = v
-        if amongus then
-            local ScreenGuuii = Instance.new("ScreenGui")
-            local uilistlayourthing = Instance.new("UIListLayout")
-            local b = Instance.new("TextLabel")
-            local c = Instance.new("TextLabel")
-            local e = Instance.new("TextLabel")
-            local f = Instance.new("TextLabel")
-            local a = Instance.new("TextLabel")
-            local d = Instance.new("TextLabel")
-            ScreenGuuii.Parent = game.CoreGui
-            uilistlayourthing.Parent = ScreenGuuii
-            uilistlayourthing.HorizontalAlignment = Enum.HorizontalAlignment.Right
-            uilistlayourthing.Padding = UDim.new(0, 9)
-            b.Name = "b"
-            b.Parent = ScreenGuuii
-            b.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            b.BackgroundTransparency = 1.000
-            b.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            b.Size = UDim2.new(0, 27, 0, 14)
-            b.Font = Enum.Font.SourceSansLight
-            b.Text = "FatherDisabler"
-            b.TextColor3 = Color3.fromRGB(255, 255, 255)
-            b.TextSize = 28.000
-            c.Name = "c"
-            c.Parent = ScreenGui
-            c.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            c.BackgroundTransparency = 1.000
-            c.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            c.Size = UDim2.new(0, 27, 0, 14)
-            c.Font = Enum.Font.SourceSansLight
-            c.Text = "CockDisabler"
-            c.TextColor3 = Color3.fromRGB(255, 255, 255)
-            c.TextSize = 28.000
-            e.Name = "e"
-            e.Parent = ScreenGui
-            e.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            e.BackgroundTransparency = 1.000
-            e.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            e.Size = UDim2.new(0, 27, 0, 14)
-            e.Font = Enum.Font.SourceSansLight
-            e.Text = "NiggaKiller"
-            e.TextColor3 = Color3.fromRGB(255, 255, 255)
-            e.TextSize = 28.000
-            f.Name = "f"
-            f.Parent = ScreenGui
-            f.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            f.BackgroundTransparency = 1.000
-            f.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            f.Size = UDim2.new(0, 27, 0, 14)
-            f.Font = Enum.Font.SourceSansLight
-            f.Text = "ChildESP"
-            f.TextColor3 = Color3.fromRGB(255, 255, 255)
-            f.TextSize = 28.000
-            a.Name = "a"
-            a.Parent = ScreenGui
-            a.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            a.BackgroundTransparency = 1.000
-            a.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            a.Size = UDim2.new(0, 27, 0, 14)
-            a.Font = Enum.Font.SourceSansLight
-            a.Text = "NoCumSlowDown"
-            a.TextColor3 = Color3.fromRGB(255, 255, 255)
-            a.TextSize = 28.000
-            d.Name = "d"
-            d.Parent = ScreenGui
-            d.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            d.BackgroundTransparency = 1.000
-            d.Position = UDim2.new(0.985937476, 0, 0.0282208584, 0)
-            d.Size = UDim2.new(0, 27, 0, 14)
-            d.Font = Enum.Font.SourceSansLight
-            d.Text = "AutoGroom"
-            d.TextColor3 = Color3.fromRGB(255, 255, 255)
-            d.TextSize = 28.000
-            makeRainbowText(a, true)
-            makeRainbowText(b, true)
-            makeRainbowText(c, true)
-            makeRainbowText(d, true)
-            makeRainbowText(e, true)
-            makeRainbowText(f, true)
-        else
-            ScreenGuuii:Destroy()
-        end
-    end
-})
---]]
-
--- WORLD
-
-local oldpos = Vector3.new(0, 0, 0)
-local function getScaffold(vec, diagonaltoggle)
-    local realvec = Vector3.new(math.floor((vec.X / 3) + 0.5) * 3, math.floor((vec.Y / 3) + 0.5) * 3, math.floor((vec.Z / 3) + 0.5) * 3) 
-    local newpos = (oldpos - realvec)
-    local returedpos = realvec
-    if entity.isAlive then
-        local angle = math.deg(math.atan2(-lplr.Character.Humanoid.MoveDirection.X, -lplr.Character.Humanoid.MoveDirection.Z))
-        local goingdiagonal = (angle >= 130 and angle <= 150) or (angle <= -35 and angle >= -50) or (angle >= 35 and angle <= 50) or (angle <= -130 and angle >= -150)
-        if goingdiagonal and ((newpos.X == 0 and newpos.Z ~= 0) or (newpos.X ~= 0 and newpos.Z == 0)) and diagonaltoggle then
-            return oldpos
-        end
-    end
-    return realvec
-end
-
-local yes
-local yestwo
-local sussyfunnything
-local sussything = false
-Tabs["World"]:CreateToggle({
-    ["Name"] = "Scaffold",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        sussythingy = v
-        if (sussythingy) and entity.isAlive then
-            spawn(function()
-                yestwo = RunService.Heartbeat:Connect(function(step)
-                    if (not sussythingy) then return end
-                    local y = lplr.Character.HumanoidRootPart.Position.y
-                    local x = lplr.Character.HumanoidRootPart.Position.x
-                    local z = lplr.Character.HumanoidRootPart.Position.z
-                    local blockpos = getScaffold((lplr.Character.Head.Position) + Vector3.new(1, -math.floor(lplr.Character.Humanoid.HipHeight * 3), 0) + lplr.Character.Humanoid.MoveDirection)
-                    placeblockthing(blockpos, getwool())
-                end)
-            end)
-        else
-            yestwo:Disconnect()
-        end
-    end
-})
-
-function animfunc(id)
-    local Animator = hmd:WaitForChild("Animator")
-    local Animation = Instance.new("Animation", char)
-    Animation.AnimationId = "rbxassetid://"..id
-    Animation.Parent = char
-
-    local PlayAnim = Animator:LoadAnimation(Animation)
-    PlayAnim:Play()
-end
-
-function getbedsxd()
-    local beds = {}
-    local blocks = game:GetService("Workspace").Map.Blocks
-    for _,Block in pairs(blocks:GetChildren()) do
-        if Block.Name == "bed" and Block.Covers.BrickColor ~= game.Players.LocalPlayer.Team.TeamColor then
-            table.insert(beds,Block)
-        end
-    end
-    return beds
-end
-
-function getbedsblocks()
-    local blockstb = {}
-    local blocks = game:GetService("Workspace").Map.Blocks
-    for i,v in pairs(blocks:GetChildren()) do
-        if v:IsA("Part") then
-            table.insert(blockstb,v)
-        end
-    end
-    return blockstb
-end
-
-function blocks(bed)
-    local aboveblocks = 0
-    local Blocks = getbedsblocks()
-    for _,Block in pairs(Blocks) do
-        if Block.Position.X == bed.X and Block.Position.Z == bed.Z and Block.Name ~= "bed" and (Block.Position.Y - bed.Y) <= 9 and Block.Position.Y > bed.Y then
-            aboveblocks = aboveblocks + 1
-        end
-    end
-    return aboveblocks
-end
-
-function nuker()
-    local beds = getbedsxd()
-    for _,bed in pairs(beds) do
-        local bedmagnitude = (bed.Position - game.Players.LocalPlayer.Character.PrimaryPart.Position).Magnitude
-        if bedmagnitude < 27 then
-            local upnum = blocks(bed.Position)
-            local x = math.round(bed.Position.X/3)
-            local y = math.round(bed.Position.Y/3) + upnum
-            local z = math.round(bed.Position.Z/3)
-            game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.DamageBlock:InvokeServer({
-                ["blockRef"] = {
-                    ["blockPosition"] = Vector3.new(x,y,z)
-                },
-                ["hitPosition"] = Vector3.new(x,y,z),
-                ["hitNormal"] = Vector3.new(x,y,z),
-            })
-        end
-    end
-end
-
---[[function funinuker()
-    if (not isclone) then
-        local beds = getbedsxd()
-        for _,bed in pairs(beds) do
-            local bedmagnitude = (bed.Position - game.Players.LocalPlayer.Character.PrimaryPart.Position).Magnitude
-            if bedmagnitude < 27 then
-                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                    ["invisibleLandmine"] = bed
-                })
-            end
-        end
-    else
-        local beds = getbedsxd()
-        for _,bed in pairs(beds) do
-            local bedmagnitude = (bed.Position - clone.PrimaryPart.Position).Magnitude
-            if bedmagnitude < 27 then
-                game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged[landmineremote]:FireServer({
-                    ["invisibleLandmine"] = bed
-                })
-            end
-        end
-    end
-end-]]
-
-Tabs["World"]:CreateToggle({
-    ["Name"] = "BedRekter",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        local bedrekterval = v
-        if bedrekterval then
-            spawn(function()
-                repeat
-                    wait()
-                    if entity.isAlive then
-                        wait(0.25)
-                        if (not bedrekterval) then return end
-                        nuker()
-                    end
-                until (not bedrekterval)
-            end)
-        end
-    end
-})
-
---[[Tabs["World"]:CreateToggle({
-    ["Name"] = "BedRekterV2",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        local BedRekterV2val = v
-        if BedRekterV2val then
-            spawn(function()
-                repeat
-                    wait()
-                    if (not BedRekterV2val) then return end
-                    funinuker()
-                until (not BedRekterV2val)
-            end)
-        end
-    end
-})-]]
-
-Tabs["World"]:CreateToggle({
-    ["Name"] = "LowGravity",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        if v == true then
-            workspace.Gravity = 10
-        else
-            workspace.Gravity = 196.19999694824
-        end
-    end
-})
-
---[[ code no work lmao 
-local plrs = GetAllNearestHumanoidToPosition(17.4, 3)
-local targetinfoval = false
-local ScreenGuitwoooo
-Tabs["World"]:CreateToggle({
-    ["Name"] = "TargetInfo",
-    ["Keybind"] = nil,
-    ["Callback"] = function(v)
-        targetinfoval = v
-        if targetinfoval then
-            ScreenGuitwoooo = Instance.new("ScreenGui")
-            ScreenGuitwoooo.Parent = game.CoreGui
-            ScreenGuitwoooo.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-            local Frame = Instance.new("Frame")
-            local Frame_2 = Instance.new("Frame")
-            local Frame_3 = Instance.new("Frame")
-            local TextLabel = Instance.new("TextLabel")
-            local Frame_4 = Instance.new("Frame")
-            local Frame_5 = Instance.new("Frame")
-            ScreenGuitwoooo.Enabled = false
-            Frame.Parent = ScreenGuitwoooo
-            Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            Frame.BackgroundTransparency = 0.200
-            Frame.BorderSizePixel = 0
-            Frame.Position = UDim2.new(0.576041698, 0, 0.652760744, 0)
-            Frame.Size = UDim2.new(0, 400, 0, 160)
-            Frame_2.Parent = Frame
-            Frame_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Frame_2.BorderSizePixel = 0
-            Frame_2.Size = UDim2.new(0, 6, 0, 160)
-            makeRainbowFrame(Frame_2, true)
-            Frame_3.Parent = Frame
-            Frame_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Frame_3.BackgroundTransparency = 1.000
-            Frame_3.Position = UDim2.new(0.0524999984, 0, 0.268750012, 0)
-            Frame_3.Size = UDim2.new(0, 357, 0, 6)
-            TextLabel.Parent = Frame_3
-            TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel.BackgroundTransparency = 1.000
-            TextLabel.BorderSizePixel = 0
-            TextLabel.Position = UDim2.new(0, 0, -7.16666651, 0)
-            TextLabel.Size = UDim2.new(0, 156, 0, 43)
-            TextLabel.Font = Enum.Font.SourceSansLight
-            TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TextLabel.TextSize = 36.000
-            TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-            makeRainbowText(TextLabel, true)
-            Frame_4.Parent = Frame_3
-            Frame_4.BackgroundColor3 = Color3.fromRGB(17, 61, 0)
-            Frame_4.Position = UDim2.new(-0.001221288, 0, -0.0643333495, 0)
-            Frame_4.Size = UDim2.new(0, 357, 0, 6)
-            Frame_4.ZIndex = 2
-            Frame_5.Parent = Frame_4
-            Frame_5.BackgroundColor3 = Color3.fromRGB(126, 250, 86)
-            Frame_5.Position = UDim2.new(-0.00122138695, 0, -0.0643310547, 0)
-            Frame_5.Size = UDim2.new(0, 357, 0, 6)
-            spawn(function()
-                repeat task.wait() until matchState == 2
-                if matchState == 2 then
-                    repeat
-                        wait()
-                        if plr then
-                            wait()
-                            for i, plr in pairs(plrs) do
-                                local targetinfo = {
-                                    ["Username"] = plr.Name,
-                                    ["Health"] = plr.Character.Humanoid.Health
-                                }
-                            end
-                            ScreenGuitwoooo.Enabled = true
-                            Frame_3.Size = UDim2.new(0, 357 - targetinfo["Health"] * 3.55, 0, 6)
-                            TextLabel.Text = targetinfo["Username"]
-                        else
-                            wait()
-                            ScreenGuitwoooo.Enabled = false
-                        end
-                    until (not targetinfoval)
-                end
-            end)
-        else
-            makeRainbowFrame(Frame_2, false)
-            makeRainbowText(TextLabel, false)
-            ScreenGuitwoooo:Destroy()
-        end
-    end
-})
--- code no work lmao]]
-
-for i, v in pairs(game.Players:GetPlayers()) do
-	for k, b in pairs(whitelists) do
-		if lplr.UserId ~= tonumber(b) and v.UserId == tonumber(b) then
-            local args = {
-                [1] = "hi " .. v.Name .. "!",
-                [2] = "All"
+        function tabtable:CreateToggle(data)
+            local info = {
+            ["Name"] = data["Name"],  
+            ["Keybind"] = (configtable[data["Name"]["Keybind"]] or data["Keybind"]), 
+            ["Callback"] = (data["Callback"] or function() end)
             }
-            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
-        end
-	end
-end
-
-for i, v in pairs(game.Players:GetPlayers()) do
-    for k, b in pairs(whitelists) do
-        if lplr.UserId == tonumber(b) then
-            v.Chatted:Connect(function(msg)
-                if msg == "hi " .. lplr.Name .. "!" then
-                    print("sus")
-                    createnotification("Rektsky user detected", v.Name.. " is using rektsky", 10, true)        
+            -- adding module name to configtable
+            configtable[info["Name"]]={
+                ["Keybind"]=((configtable[info["Name"]] and configtable[info["Name"]]["Keybind"]) or "none"), 
+                ["IsToggled"]=((configtable[info["Name"]] and configtable[info["Name"]]["IsToggled"]) or false)
+            }
+            -- code
+            local title,keybind,callback=info["Name"],info["Keybind"],info["Callback"]
+            keybind = (keybind or {["Name"] = nil})
+            keybinds[(keybind.Name or "%*")] = (keybind.Name == nil and false or true)
+            local focus = {
+                ["Elements"]={}
+            }
+            
+            local sussyamog = {["Enabled"] = false, ["Name"] = (data["Name"] or "")}
+            table.insert(tabtable["Toggles"],#tabtable["Toggles"])
+            sussyamog["Enabled"] = false
+            sussyamog["Name"] = (data["Name"] or "")
+            callback = callback or function() end
+            local oldkey = keybind.Name
+            local toggle = Instance.new("TextButton")
+            local togname = Instance.new("TextLabel")
+            local toggledtog = Instance.new("TextButton")
+            local togname_2 = Instance.new("TextLabel")
+            toggle.Name = "toggle_" .. title
+            toggle.Parent = tab
+            toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+            toggle.BorderSizePixel = 0
+            toggle.Position = UDim2.new(0.0827946085, -17, 0.133742347, 33)
+            toggle.Size = UDim2.new(0, 207, 0, 40)
+            toggle.Text = ""
+            togname.Name = "toggle_" .. title .. "234"
+            togname.Parent = toggle
+            togname.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            togname.BackgroundTransparency = 1.000
+            togname.BorderSizePixel = 0
+            togname.Position = UDim2.new(0.0338164233, 0, 0.163378686, 0)
+            togname.Size = UDim2.new(0, 192, 0, 26)
+            togname.Font = Enum.Font.SourceSansLight
+            togname.Text = title
+            togname.TextColor3 = Color3.fromRGB(255, 255, 255)
+            togname.TextSize = 22.000
+            togname.TextWrapped = true
+            togname.TextXAlignment = Enum.TextXAlignment.Left
+            local optionselement = {
+                ["Stuff"] = {}
+            }
+            local BindText
+                table.insert(optionselement["Stuff"],#optionselement["Stuff"])
+                local optionframe = Instance.new("Frame")
+                optionframe.Name = "optionframe"
+                optionframe.Parent = tab
+                optionframe.BackgroundColor3 = Color3.fromRGB(47, 48, 64)
+                optionframe.Position = UDim2.new(0.102424242, 0, 0.237059206, 0)
+                optionframe.Size = UDim2.new(0, 207, 0, 0)
+                optionframe.AutomaticSize = "Y"
+                optionframe.Visible = false
+                local UIListLayout = Instance.new("UIListLayout")
+                UIListLayout.Parent = optionframe
+                UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                UIListLayout.Padding = UDim.new(0, 8)
+                BindText = Instance.new("TextButton")
+                BindText.Name = "BindText"
+                BindText.Parent = optionframe
+                BindText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                BindText.BackgroundTransparency = 1.000
+                BindText.Position = UDim2.new(0.0989583358, 0, 0, 0)
+                BindText.Size = UDim2.new(0, 175, 0, 33)
+                BindText.Font = Enum.Font.SourceSansLight
+                BindText.Text = "Bind: none"
+                BindText.TextColor3 = Color3.fromRGB(255, 255, 255)
+                BindText.TextSize = 22.000
+                BindText.TextXAlignment = Enum.TextXAlignment.Left
+                BindText.TextYAlignment = Enum.TextYAlignment.Center
+                BindText.MouseEnter:Connect(function()
+                    focus["Elements"]["toggle_"..title]=true 
+                end)
+                BindText.MouseLeave:Connect(function()
+                    focus["Elements"]["toggle_"..title]=false
+                end)
+                conf["functions"]:WriteConfigs(configtable)
+                local x = (game:GetService("HttpService"):JSONDecode(readfile(conf["file"])))
+                if isfile(conf["file"]) and x[title]["Keybind"] ~= "none" and x[title]["Keybind"] ~= nil then
+                    x = x[title]["Keybind"]
+                    --[title]["Keybind"] or "none")
+                    if keybinds[x] == true then
+                        BindText.Text = "Bind: "..x
+                        isclicked = false
+                        return
+                    end
+                    if oldkey ~= nil then 
+                        keybinds[oldkey] = nil
+                    end
+                    oldkey=x
+                    BindText.Text = "Bind: "..x
+                    configtable[title]["Keybind"] = x
+                    isclicked = false
+                    cooldown = true
+                    wait(0.5)
+                    cooldown = false
                 end
+                BindText.MouseButton1Click:Connect(function()
+                    if not focus["Elements"]["toggle_"..title]  then return end
+                    if isclicked == true then return end
+                    isclicked = true
+                    BindText.Text = "Bind: ..."
+                    
+                    uis.InputBegan:Connect(function(input)
+                        if input.KeyCode.Name ~= "Unknown" and input.KeyCode.Name ~= oldkey then
+                            if isclicked  == false  then return end
+                            if keybinds[input.KeyCode.Name] == true then
+                                BindText.Text = "Bind: "..oldkey
+                                isclicked = false
+                                return
+                            end
+                            if oldkey ~= nil then 
+                                keybinds[oldkey] = nil
+                            end
+                            oldkey=input.KeyCode.Name
+                            BindText.Text = "Bind: "..oldkey
+                            configtable[title]["Keybind"] = oldkey
+                            isclicked = false
+                            cooldown = true
+                            wait(0.5)
+                            cooldown = false
+                        end
+                    end)
+                end)
+                toggle.MouseButton2Click:Connect(function()
+                    optionframe.Visible = not optionframe.Visible
+                end) 
+    
+            if isfile(conf["file"]) then
+               
+            else
+               configtable[title]["IsToggled"]=false
+            end
+    
+            function sussyamog:Toggle(bool)
+                bool = bool or (not sussyamog["Enabled"])
+                sussyamog["Enabled"] = bool
+                if not bool then
+                    spawn(function()
+                        callback(false)
+                    end)
+                    spawn(function()
+                        createnotification(title, "Disabled "..title, 4, false)
+                        configtable[title]["IsToggled"] = false
+                    end)
+                    toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                    playdingsound(false)
+                else
+                    spawn(function()
+                        callback(true)
+                    end)
+                    spawn(function()
+                        createnotification(title, "Enabled "..title, 4, true)
+                        configtable[title]["IsToggled"] = true
+                    end)
+                    toggle.BackgroundColor3 = tabname.TextColor3
+                    playdingsound(true)
+                end
+            end
+    
+            function sussyamog:silentToggle(bool)
+                bool = bool or (not sussyamog["Enabled"])
+                if type(bool) == "boolean" then
+                    bool = bool
+                else
+                    if type(bool) == "string" then
+                        if bool == "true" then
+                            bool = true
+                        else
+                            if bool == "false" then
+                                bool = false
+                            end
+                        end
+                    end
+                end
+                sussyamog["Enabled"] = bool
+                if bool == false or bool == "false" then
+                    spawn(function()
+                        callback(false)
+                    end)
+                    configtable[title]["IsToggled"] = false
+                    toggle.BackgroundColor3 = Color3.fromRGB(14, 20, 14)
+                else
+                    if bool == true or bool == "true" then
+                        spawn(function()
+                            callback(true)
+                        end)
+                        configtable[title]["IsToggled"] = true
+                        toggle.BackgroundColor3 = tabname.TextColor3
+                    end
+                end
+            end
+            
+            toggle.MouseButton1Click:Connect(function()
+                sussyamog:Toggle()
             end)
-        end 
-    end
-end
-
-for i, v in pairs(game.Players:GetPlayers()) do
-    for k, b in pairs(whitelists) do
-        if lplr.UserId ~= tonumber(b) then
-            if v.UserId == tonumber(b) then
-                v.Chatted:Connect(function(msg)
-                    if msg == "r!kick" then
-                        lplr:kick("Skill issue'd by rektsky priv user!")
+            uis.InputBegan:Connect(function(input)
+                if oldkey == nil then return end
+                if cooldown == true then
+                    cooldown = false
+                    return
+                end
+                if isclicked == true then return end
+                if input.KeyCode.Name == oldkey and game:GetService("UserInputService"):GetFocusedTextBox() == nil then
+                    sussyamog:Toggle()
+                end	
+            end) 
+            if configtable[title]["IsToggled"]==true then
+                sussyamog:silentToggle(true)
+            end
+            function sussyamog:CreateSlider(argstable)
+                local sliderapi = {["Value"] = (configtable[argstable["Name"]..sussyamog["Name"].."_SR"] and configtable[argstable["Name"]..sussyamog["Name"].."_SR"]["Value"] or argstable.Default or argstable.Min)}
+                local min, max, roundval = argstable.Min, argstable.Max, (argstable.Round or 2)
+                local slider = Instance.new("TextButton")
+                local slidertext = Instance.new("TextLabel")
+                local slider_2 = Instance.new("Frame")
+                slider.Name = "slider"
+                slider.Parent = optionframe
+                slider.BackgroundColor3 = Color3.fromRGB(47, 48, 64)
+                slider.BorderSizePixel = 0
+                slider.Position = UDim2.new(0.0833333358, 0, 0.109391868, 0)
+                slider.Size = UDim2.new(0, 180, 0, 34)
+                slider.Text = ""
+                slider.AutoButtonColor = false
+                slidertext.Name = "slidertext"
+                slidertext.Parent = slider
+                slidertext.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                slidertext.BackgroundTransparency = 1.000
+                slidertext.BorderSizePixel = 0
+                slidertext.Position = UDim2.new(0.0188679248, 0, 0, 0)
+                slidertext.Size = UDim2.new(0, 180, 0, 33)
+                slidertext.ZIndex = 3
+                slidertext.Font = Enum.Font.SourceSansLight
+                slidertext.Text = "yes"
+                slidertext.TextColor3 = Color3.fromRGB(255, 255, 255)
+                slidertext.TextSize = 22.000
+                slidertext.TextXAlignment = Enum.TextXAlignment.Left
+                slider_2.Name = "slider"
+                slider_2.Parent = slider
+                slider_2.BackgroundColor3 = color
+                slider_2.BorderSizePixel = 0
+                slider_2.Position = UDim2.new(0.00786163565, 0, -0.00825500488, 0)
+                slider_2.Size = UDim2.new(0, 0, 0, 34)
+                slider_2.ZIndex = 2
+                local mouse = game.Players.LocalPlayer:GetMouse()
+                if configtable[argstable["Name"]..sussyamog["Name"].."_SR"] == nil then
+                    configtable[argstable["Name"]..sussyamog["Name"].."_SR"] = {["Value"] = sliderapi["Value"]}
+                end
+                local function slide(input)
+                    local sizeX = math.clamp((input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
+                    slider_2.Size = UDim2.new(sizeX, 0, 1, 0)
+                    local value = math.floor(((((max - min) * sizeX) + min) * (10 ^ roundval)) +0.5)/(10 ^ roundval)
+                    sliderapi["Value"] = value
+                    slidertext.Text = argstable.Name..": "..tostring(value)
+                    configtable[argstable["Name"]..sussyamog["Name"].."_SR"]["Value"]=sliderapi["Value"]
+                    if not argstable["OnInputEnded"] then
+                        argstable.Function(value)
                     end
-                    if msg == "r!lagback" then
-                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(555, 0, 0)
-                    end
-                    if msg == "r!kill" then
-                        lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                end
+                local sliding
+                slider.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        sliding = true
+                        slide(input)
                     end
                 end)
+
+                slider.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if argstable["OnInputEnded"] then
+                            argstable.Function(sliderapi.Value)
+                            configtable[argstable["Name"]..sussyamog["Name"].."_SR"]["Value"]=sliderapi["Value"] 
+                        end
+                        sliding = false
+                    end
+                end)
+
+                uis.InputChanged:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseMovement then
+                        if sliding then
+                            slide(input)
+                        end
+                    end
+                end)
+
+                sliderapi["Set"] = function(value)
+                    local value = math.floor((math.clamp(value, min, max) * (10^roundval))+0.5)/(10^roundval)
+                    sliderapi["Value"] = value
+                    slider_2.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+                    slidertext.Text = argstable.Name..": "..tostring(value)
+                    argstable.Function(value)
+                end
+                sliderapi.Set(sliderapi["Value"])
+
+                lib["Objects"][argstable.Name.."Slider"] = {["API"] = sliderapi, ["Instance"] = Slider, ["Type"] = "Slider", ["OptionsButton"] = argstable.Name, ["Window"] = TabsFrame.Name}
+                return sliderapi
             end
+            function sussyamog:CreateDropDown(argstable)
+                local ddname = argstable.Name
+                local dropdownapi = {["Value"] = nil, ["List"] = {}}
+                for i,v in next, argstable.List do 
+                    table.insert(dropdownapi.List, v)
+                end
+                if configtable[ddname] == nil then
+                    configtable[ddname] = {["Value"] = dropdownapi["Value"]}
+                end
+                dropdownapi["Value"] = (configtable[ddname] and configtable[ddname]["Value"]) or argstable.Default or dropdownapi.List[1]
+                local function stringtablefind(table1, key)
+                    for i,v in next, table1 do
+                        if tostring(v) == tostring(key) then
+                            return i
+                        end
+                    end
+                end
+    
+                local function getvalue(index) 
+                    local realindex
+                    if index > #dropdownapi.List then
+                        realindex = 1 
+                    elseif index < 1 then
+                        realindex = #dropdownapi.List
+                    else
+                        realindex = index
+                    end
+                    return realindex
+                end
+                local Dropdown = Instance.new("TextButton")
+                Dropdown.Name = "Dropdown"
+                Dropdown.Parent = optionframe
+                Dropdown.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                Dropdown.BackgroundTransparency = 1.000
+                Dropdown.BorderSizePixel = 0
+                Dropdown.Position = UDim2.new(0.0859375, 0, 0.491620123, 0)
+                Dropdown.Size = UDim2.new(0, 175, 0, 25)
+                Dropdown.Font = Enum.Font.SourceSansLight
+                Dropdown.Text = "Mode: "..argstable.Default
+                Dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+                Dropdown.TextSize = 22.000
+                Dropdown.TextWrapped = true
+                Dropdown.TextXAlignment = Enum.TextXAlignment.Left
+                Dropdown.TextYAlignment = Enum.TextYAlignment.Bottom
+                dropdownapi["Select"] = function(_select) 
+                    if dropdownapi.List[_select] or stringtablefind(dropdownapi.List, _select) then
+                        dropdownapi["Value"] = dropdownapi.List[_select] or dropdownapi.List[stringtablefind(dropdownapi.List, _select)]
+                        Dropdown.Text = "Mode: "..tostring(dropdownapi.Value)
+                        configtable[ddname]["Value"]=dropdownapi["Value"]
+                        argstable.Function(dropdownapi["Value"])
+                    end
+                end
+                dropdownapi["SelectNext"] = function() 
+                    local newindex = table.find(dropdownapi.List, dropdownapi.Value) 
+                    if newindex then 
+                        newindex = getvalue(newindex + 1)
+                        dropdownapi.Select(newindex)
+                    else
+                        warn("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!,")
+                        createnotification("NewIndex in selector ("..argstable.Name..") in function `SelectNext` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/rektsky/config\nand delete everything inside of that folder", 10, false)
+                    end
+                end
+
+                dropdownapi["SelectPrevious"] = function() 
+                    local newindex = table.find(dropdownapi.List, dropdownapi.Value) 
+                    if newindex then 
+                        newindex = getvalue(newindex - 1)
+                        dropdownapi.Select(newindex)
+                    else
+                        warn("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!")
+                            createnotification("NewIndex in selector ("..argstable.Name..") in function `SelectPrevious` was not found!", "If this keeps happening, go to you exploit's folder\nthen go to workspace/rektsky/config\nand delete everything inside of that folder", 10, false)
+                    end
+                end
+    			if configtable[ddname] and configtable[ddname]["Value"] then
+    				dropdownapi.Select(stringtablefind(dropdownapi.List,configtable[ddname]["Value"]))
+    			end
+                Dropdown.MouseButton1Click:Connect(dropdownapi.SelectNext)
+                Dropdown.MouseButton2Click:Connect(dropdownapi.SelectPrevious)
+    
+                lib["Objects"][argstable.Name.."Selector"] = {["API"] = dropdownapi, ["Instance"] = Selector, ["Type"] = "Selector", ["OptionsButton"] = argstable.Name, ["Window"] = TabsFrame.Name}
+                return dropdownapi
+            end
+            function sussyamog:CreateOptionTog(argstable)
+                if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
+                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = false}
+                end
+                local optiontogval = {["Value"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.default}
+                local thing = {
+                    ["Name"] = argstable["Name"],
+                    ["Func"] = argstable["Func"]
+                }
+                argstable["Func"] = argstable["Func"] or function() end
+                local tognametwo = Instance.new("TextLabel")
+                local toggleactived = Instance.new("Frame")
+                local untoggled = Instance.new("TextButton")
+                tognametwo.Name = "tognametwo"
+                tognametwo.Parent = optionframe
+                tognametwo.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                tognametwo.BackgroundTransparency = 1.000
+                tognametwo.Position = UDim2.new(0.0911458358, 0, 0.502793312, 0)
+                tognametwo.Size = UDim2.new(0, 170, 0, 32)
+                tognametwo.Font = Enum.Font.SourceSansLight
+                tognametwo.TextColor3 = Color3.fromRGB(255, 255, 255)
+                tognametwo.TextSize = 22.000
+                tognametwo.TextXAlignment = Enum.TextXAlignment.Left
+                tognametwo.Text = argstable["Name"]
+                untoggled.Name = "untoggled"
+                untoggled.Parent = tognametwo
+                untoggled.BackgroundColor3 = Color3.fromRGB(66, 68, 66)
+                untoggled.BorderSizePixel = 0
+                untoggled.Position = UDim2.new(0.816739559, 0, 0.0743236542, 0)
+                untoggled.Size = UDim2.new(0, 29, 0, 29)
+                untoggled.ZIndex = 2
+                untoggled.AutoButtonColor = false
+                toggleactived.Name = "togthingylol"
+                toggleactived.Parent = tognametwo
+                toggleactived.BackgroundColor3 = Color3.fromRGB(66, 68, 66)
+                toggleactived.BorderSizePixel = 0
+                toggleactived.Position = UDim2.new(0, 141, 0, 5)
+                toggleactived.Size = UDim2.new(0, 24, 0, 24)
+                toggleactived.ZIndex = 3
+                if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
+                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = false}
+                end
+                function optiontogval:Toggle(bool)
+                    bool = bool or not (optiontogval["Value"])
+                    optiontogval["Value"] = bool
+                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"]=bool
+                    if not bool then
+                        spawn(function()
+                            argstable["Func"](false)
+                        end)
+                        toggleactived.BackgroundColor3 = Color3.fromRGB(68, 68, 60)
+                    else
+                        spawn(function()
+                            argstable["Func"](true)
+                        end)
+                        toggleactived.BackgroundColor3 = tabname.TextColor3
+                    end
+                end
+                if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] then
+                	optiontogval:Toggle(configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"])
+                end
+                untoggled.MouseButton1Click:Connect(function()
+                    optiontogval:Toggle()
+                end)
+                return optiontogval
+            end
+            local thngylol = Instance.new("Frame")
+            thngylol.Parent = optionframe
+            thngylol.Transparency = 1
+            thngylol.Size = UDim2.new(0, 0, 0, 0.7)
+            thngylol.LayoutOrder = 99999
+            local thngyloltwo = Instance.new("Frame")
+            thngyloltwo.Parent = optionframe
+            thngyloltwo.Transparency = 1
+            thngyloltwo.Size = UDim2.new(0, 0, 0, 0.7)
+            thngyloltwo.LayoutOrder = -9999
+            return sussyamog
         end
+        return tabtable
     end
 end
+lib:ToggleLib()
+uis.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        lib:ToggleLib()
+    end
+end) 
+return lib
