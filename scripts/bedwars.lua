@@ -523,6 +523,7 @@ do
     })
     killauraissoundenabled = katog:CreateOptionTog({
         ["Name"] = "Swing Sound",
+        ["Default"] = true,
         ["Func"] = function() end
     })
     killaurasoundvalue = katog:CreateSlider({
@@ -530,11 +531,12 @@ do
         ["Function"] = function() end,
         ["Min"] = 0,
         ["Max"] = 1,
-        ["Default"] = 1,
+        ["Default"] = 0.2,
         ["Round"] = 1
     })
     killauraisswingenabled = katog:CreateOptionTog({
         ["Name"] = "Swing Animation",
+        ["Default"] = true,
         ["Func"] = function() end
     })
     DistVal = katog:CreateSlider({
@@ -547,6 +549,7 @@ do
     })
     killaurafirstpersonanim = katog:CreateOptionTog({
         ["Name"] = "Anims (1rs person)",
+        ["Default"] = true,
         ["Func"] = function() end
     })
     killauraanimval = katog:CreateDropDown({
@@ -2206,6 +2209,104 @@ Tabs["Rektsky"]:CreateToggle({
         end
     end
 })
+
+do
+    local sayinchat = {["Value"] = false}
+    local notificationsenabled = {["Value"] = true}
+    local autoreport = false
+    local autoreportthingy = Tabs["Rektsky"]:CreateToggle({
+        ["Name"] = "AutoReport",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            autoreport = v
+            if autoreport then
+                local reporttable = {
+                    ["ez"] = "Bullying",
+                    ["gay"] = "Bullying",
+                    ["gae"] = "Bullying",
+                    ["hacks"] = "Scamming",
+                    ["hacker"] = "Scamming",
+                    ["hack"] = "Scamming",
+                    ["cheat"] = "Scamming",
+                    ["hecker"] = "Scamming",
+                    ["get a life"] = "Bullying",
+                    ["L"] = "Bullying",
+                    ["thuck"] = "Swearing",
+                    ["thuc"] = "Swearing",
+                    ["thuk"] = "Swearing",
+                    ["fatherless"] = "Bullying",
+                    ["yt"] = "Offsite Links",
+                    ["discord"] = "Offsite Links",
+                    ["dizcourde"] = "Offsite Links",
+                    ["retard"] = "Swearing",
+                    ["tiktok"] = "Offsite Links",
+                    ["bad"] = "Bullying",
+                    ["trash"] = "Bullying",
+                    ["die"] = "Bullying",
+                    ["lobby"] = "Bullying",
+                    ["ban"] = "Bullying",
+                    ["youtube"] = "Offsite Links",
+                    ["im hacking"] = "Cheating/Exploiting",
+                    ["I'm hacking"] = "Cheating/Exploiting",
+                    ["download"] = "Offsite Links",
+                    ["kill your"] = "Bullying",
+                    ["kys"] = "Bullying",
+                    ["hack to win"] = "Bullying",
+                    ["bozo"] = "Bullying",
+                    ["kid"] = "Bullying",
+                    ["adopted"] = "Bullying",
+                    ["vxpe"] = "Cheating/Exploiting",
+                    ["futureclient"] = "Cheating/Exploiting",
+                    ["nova6"] = "Cheating/Exploiting",
+                    [".gg"] = "Offsite Links",
+                    ["gg"] = "Offsite Links",
+                    ["lol"] = "Bullying",
+                    ["suck"] = "Dating",
+                    ["love"] = "Dating",
+                    ["fuck"] = "Swearing",
+                    ["sthu"] = "Swearing",
+                    ["i hack"] = "Cheating/Exploiting",
+                    ["disco"] = "Offsite Links",
+                    ["dc"] = "Offsite Links"
+                }
+                function getreport(msg)
+                    for i,v in pairs(reporttable) do 
+                        if msg:lower():find(i) then 
+                            return v
+                        end
+                    end
+                    return nil
+                end
+                for i, v in pairs(game.Players:GetPlayers()) do
+                    if v.Name ~= lplr.Name then
+                        v.Chatted:connect(function(msg)
+                            local reportfound = getreport(msg)
+                            if reportfound then
+                                if sayinchat["Value"] then
+                                    game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Reported " .. v.Name .. " for " .. reportfound, 'All')
+                                end
+                                game.Players:ReportAbuse(v, reportfound, 'He said "' .. msg .. '", was very offensive to me')
+                                if notificationsenabled["Value"] then
+                                    createnotification("Reported" .. v.Name, "for saying " .. msg, 5, true)
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+    })
+    sayinchat = autoreportthingy:CreateOptionTog({
+        ["Name"] = "Say reports in chat",
+        ["Default"] = false,
+        ["Func"] = function() end
+    })
+    notificationsenabled = autoreportthingy:CreateOptionTog({
+        ["Name"] = "Notifications",
+        ["Default"] = true,
+        ["Func"] = function() end
+    })
+end
 
 --[[
     local hackdetector = false
