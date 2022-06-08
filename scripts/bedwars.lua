@@ -223,41 +223,44 @@ local kmsanim = {
 }
 
 local rgfejd = false
+local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
 function KillauraRemote()
     for i,v in pairs(game.Players:GetChildren()) do
-        if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-            local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-            if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
-                if v.Character.Humanoid.Health > 0 then
-                    rgfejd = true
-                    local GBW = getsword()
-                    local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
-                    local Entity = v.Character
-                    local target = v.Character:GetPrimaryPartCFrame().Position
-                    attackentitycont:CallServer({
-                        ["chargedAttack"] = {["chargeRatio"] = 1},
-                        ["weapon"] = GBW ~= nil and GBW.tool,
-                        ["entityInstance"] = Entity,
-                        ["validate"] = {["targetPosition"] = {["value"] = target,
-                            ["hash"] = hvFunc(target)},
-                            ["raycast"] = {
-                                ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
-                                ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
-                            },
-                            ["selfPosition"] = {["value"] = selfPosition,
-                                ["hash"] = hvFunc(selfPosition)
+        for k, b in pairs(whitelists) do
+            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") and v.UserId ~= tonumber(b) then
+                local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
+                    if v.Character.Humanoid.Health > 0 then
+                        rgfejd = true
+                        local GBW = getsword()
+                        local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
+                        local Entity = v.Character
+                        local target = v.Character:GetPrimaryPartCFrame().Position
+                        attackentitycont:CallServer({
+                            ["chargedAttack"] = {["chargeRatio"] = 1},
+                            ["weapon"] = GBW ~= nil and GBW.tool,
+                            ["entityInstance"] = Entity,
+                            ["validate"] = {["targetPosition"] = {["value"] = target,
+                                ["hash"] = hvFunc(target)},
+                                ["raycast"] = {
+                                    ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
+                                    ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
+                                },
+                                ["selfPosition"] = {["value"] = selfPosition,
+                                    ["hash"] = hvFunc(selfPosition)
+                                }
                             }
-                        }
-                    })
-                    if killauraissoundenabled["Value"] then
-                        playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
+                        })
+                        if killauraissoundenabled["Value"] then
+                            playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
+                        end
+                        if killauraisswingenabled["Value"] then         
+                            playanimation("rbxassetid://4947108314")
+                        end
                     end
-                    if killauraisswingenabled["Value"] then         
-                        playanimation("rbxassetid://4947108314")
-                    end
+                else
+                    rgfejd = false
                 end
-            else
-                rgfejd = false
             end
         end
     end 
@@ -2626,7 +2629,6 @@ Tabs["World"]:CreateToggle({
 })
 -- code no work lmao]]
 
-local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
 for i, v in pairs(game.Players:GetPlayers()) do
 	for k, b in pairs(whitelists) do
 		if lplr.UserId ~= tonumber(b) and v.UserId == tonumber(b) then
