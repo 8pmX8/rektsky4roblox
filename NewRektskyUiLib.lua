@@ -33,6 +33,7 @@ function conf.functions:LoadConfigs()
 	if not isfile(conf["file"]) then
 		conf["functions"]:MakeFile()
 	end
+    wait(0.5)
 	return game:GetService("HttpService"):JSONDecode(readfile(conf["file"]))
 end
 
