@@ -2642,13 +2642,13 @@ end
 for i, v in pairs(game.Players:GetPlayers()) do
     for k, b in pairs(whitelists) do
         if lplr.UserId == tonumber(b) then
-            local conec
-            conec = v.Chatted:Connect(function(msg)
+            v.Chatted:Connect(function(msg)
                 if msg == "hi " .. lplr.Name .. "!" then
-                    createnotification("Rektsky User detected", v.Name.. " is using rektsky", 10, true)
+                    print("sus")
+                    createnotification("Rektsky user detected", v.Name.. " is using rektsky", 10, true)        
                 end
             end)
-        end
+        end 
     end
 end
 
