@@ -745,9 +745,9 @@ function lib:CreateWindow()
             end
             function sussyamog:CreateOptionTog(argstable)
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
-                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = false}
+                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.Default}
                 end
-                local optiontogval = {["Value"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.default}
+                local optiontogval = {["Value"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.Default}
                 local thing = {
                     ["Name"] = argstable["Name"],
                     ["Func"] = argstable["Func"]
@@ -783,7 +783,7 @@ function lib:CreateWindow()
                 toggleactived.Size = UDim2.new(0, 24, 0, 24)
                 toggleactived.ZIndex = 3
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
-                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = false}
+                    configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = optiontogval["Value"]}
                 end
                 function optiontogval:Toggle(bool)
                     bool = bool or not (optiontogval["Value"])
@@ -803,11 +803,6 @@ function lib:CreateWindow()
                 end
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] then
                 	optiontogval:Toggle(configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"])
-                end
-                if argstable.default == true then
-                    optiontogval:Toggle(true)
-                else
-                    optiontogval:Toggle(false)
                 end
                 untoggled.MouseButton1Click:Connect(function()
                     optiontogval:Toggle()
