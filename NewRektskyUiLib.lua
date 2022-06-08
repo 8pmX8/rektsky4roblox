@@ -747,7 +747,7 @@ function lib:CreateWindow()
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] == nil then
                     configtable[argstable["Name"]..sussyamog["Name"].."_OT"] = {["IsToggled"] = false}
                 end
-                local optiontogval = {["Value"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or false}
+                local optiontogval = {["Value"] = configtable[argstable["Name"]..sussyamog["Name"].."_OT"] and configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"] or argstable.default}
                 local thing = {
                     ["Name"] = argstable["Name"],
                     ["Func"] = argstable["Func"]
@@ -803,6 +803,11 @@ function lib:CreateWindow()
                 end
                 if configtable[argstable["Name"]..sussyamog["Name"].."_OT"] then
                 	optiontogval:Toggle(configtable[argstable["Name"]..sussyamog["Name"].."_OT"]["IsToggled"])
+                end
+                if argstable.default == true then
+                    optiontogval:Toggle(true)
+                else
+                    optiontogval:Toggle(false)
                 end
                 untoggled.MouseButton1Click:Connect(function()
                     optiontogval:Toggle()
