@@ -4,6 +4,8 @@ local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rek
 
 local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
 
+local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
+
 do
     local oldcharacteradded = entity.characterAdded
     entity.characterAdded = function(plr, char, localcheck)
@@ -223,44 +225,41 @@ local kmsanim = {
 }
 
 local rgfejd = false
-local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
 function KillauraRemote()
     for i,v in pairs(game.Players:GetChildren()) do
-        for k, b in pairs(whitelists) do
-            if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") and v.UserId ~= tonumber(b) then
-                local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
-                    if v.Character.Humanoid.Health > 0 then
-                        rgfejd = true
-                        local GBW = getsword()
-                        local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
-                        local Entity = v.Character
-                        local target = v.Character:GetPrimaryPartCFrame().Position
-                        attackentitycont:CallServer({
-                            ["chargedAttack"] = {["chargeRatio"] = 1},
-                            ["weapon"] = GBW ~= nil and GBW.tool,
-                            ["entityInstance"] = Entity,
-                            ["validate"] = {["targetPosition"] = {["value"] = target,
-                                ["hash"] = hvFunc(target)},
-                                ["raycast"] = {
-                                    ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
-                                    ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
-                                },
-                                ["selfPosition"] = {["value"] = selfPosition,
-                                    ["hash"] = hvFunc(selfPosition)
-                                }
+        if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
+            local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+            if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
+                if v.Character.Humanoid.Health > 0 then
+                    rgfejd = true
+                    local GBW = getsword()
+                    local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
+                    local Entity = v.Character
+                    local target = v.Character:GetPrimaryPartCFrame().Position
+                    attackentitycont:CallServer({
+                        ["chargedAttack"] = {["chargeRatio"] = 1},
+                        ["weapon"] = GBW ~= nil and GBW.tool,
+                        ["entityInstance"] = Entity,
+                        ["validate"] = {["targetPosition"] = {["value"] = target,
+                            ["hash"] = hvFunc(target)},
+                            ["raycast"] = {
+                                ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
+                                ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
+                            },
+                            ["selfPosition"] = {["value"] = selfPosition,
+                                ["hash"] = hvFunc(selfPosition)
                             }
-                        })
-                        if killauraissoundenabled["Value"] then
-                            playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
-                        end
-                        if killauraisswingenabled["Value"] then         
-                            playanimation("rbxassetid://4947108314")
-                        end
+                        }
+                    })
+                    if killauraissoundenabled["Value"] then
+                        playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
                     end
-                else
-                    rgfejd = false
+                    if killauraisswingenabled["Value"] then         
+                        playanimation("rbxassetid://4947108314")
+                    end
                 end
+            else
+                rgfejd = false
             end
         end
     end 
@@ -340,51 +339,6 @@ local isclone = false
         end 
     end
 end--]]
-
-function getclosebed()
-    for i,v in pairs(game:GetService("Workspace").Map.Blocks:GetChildren()) do
-        if v.Name == "bed" and v:FindFirstChild("Covers") then
-            local magcheck = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Covers.Position).Magnitude
-            if magcheck <= 45 then
-                return v
-            end
-        end
-    end
-end
-
-local added
-function getanumber()
-    added = 0
-    for i,v in pairs(game.Workspace.Map.Blocks:GetChildren()) do
-        local target = getclosebed()
-        if target ~= nil and v.Position then
-            if target.Position.X == v.Position.X and target.Position.Z == v.Position.Z then
-                if v.Position.Y > target.Position.Y and v.Position.Y - target.Position.Y < 16.5 then
-                    added = added + 1
-                end
-                if v.Position.Y < target.Position.Y and v.Position.Y - target.Position.Y < 16.5 then
-                    added = added - 1
-                end
-            end
-        end
-    end
-    return added
-end
-
-function hitblock(X,Y,Z)
-    local args = {
-        [1] = {
-            ["blockRef"] = {
-                ["blockPosition"] = Vector3.new(X/3,Y/3,Z/3)
-            },
-            ["hitPosition"] = Vector3.new(X/3,Y/3,Z/3),
-            ["hitNormal"] = Vector3.new(X/3,Y/3,Z/3)
-        }
-    }
-
-    game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.DamageBlock:InvokeServer(unpack(args))
-end
-
 
 local function getItem(itemName)
 	for i5, v5 in pairs(getinv(lplr)["items"]) do
@@ -2117,6 +2071,23 @@ funikillallthingy = Tabs["Exploits"]:CreateToggle({
 
 -- PLAYER
 
+
+function getmapname()
+    for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+        if v.Name == "Map" then
+            if v:FindFirstChild("Worlds") then
+                for g, c in pairs(v.Worlds:GetChildren()) do
+                    if c.Name ~= "Void_World" then
+                        return c.Name
+                    end
+		        end
+		    end
+		end
+	end
+end
+
+local lcmapname = getmapname()
+
 Tabs["Player"]:CreateToggle({
     ["Name"] = "NoFall",
     ["Keybind"] = nil,
@@ -2126,7 +2097,7 @@ Tabs["Player"]:CreateToggle({
                 repeat
                     if v == false then return end
                     wait(0.5)
-                    game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.GroundHit:FireServer(workspace.Map.Blocks,1645488277.345853)
+                    game:GetService("ReplicatedStorage").rbxts_include.node_modules.net.out._NetManaged.GroundHit:FireServer(workspace.Map.Worlds[lcmapname].Blocks,1645488277.345853)
                 until v == false
             end)
         end
@@ -2161,7 +2132,7 @@ Tabs["Player"]:CreateToggle({
 })
 
 function stealcheststrollage()
-    for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+    for i,v in pairs(game.Workspace.Map.Worlds[lcmapname]:GetChildren()) do
         if v.Name == "chest" then
             if v:FindFirstChild("ChestFolderValue") then
                 local mag = (hrp.Position - v.Position).Magnitude
@@ -2516,9 +2487,17 @@ function animfunc(id)
     PlayAnim:Play()
 end
 
+function getblockfrommap(name)
+    for i, v in pairs(game.Workspace:GetChildren()) do
+        if v:FindFirstChild(name) then
+            return v
+        end
+    end
+end
+
 function getbedsxd()
     local beds = {}
-    local blocks = game:GetService("Workspace").Map.Blocks
+    local blocks = game:GetService("Workspace").Map.Worlds[lcmapname].Blocks
     for _,Block in pairs(blocks:GetChildren()) do
         if Block.Name == "bed" and Block.Covers.BrickColor ~= game.Players.LocalPlayer.Team.TeamColor then
             table.insert(beds,Block)
@@ -2529,7 +2508,7 @@ end
 
 function getbedsblocks()
     local blockstb = {}
-    local blocks = game:GetService("Workspace").Map.Blocks
+    local blocks = game:GetService("Workspace").Map.Worlds[lcmapname].Blocks
     for i,v in pairs(blocks:GetChildren()) do
         if v:IsA("Part") then
             table.insert(blockstb,v)
