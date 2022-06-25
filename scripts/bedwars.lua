@@ -862,123 +862,121 @@ function tpreal(t)
     end
 end
 
-do
-    local connectionnn
-    local conectthing
-    local longjumpenabled
-    local floatdisab
-    local speed
-    local speedvalue = {["Value"] = 45}
-    local speeddropdown = {["Value"] = "CFrame"}
-    local speedvalueverus = {["Value"] = 80}
-    local verusspeeddelay = {["Value"] = 0.5}
-    local speedtog = Tabs["Movement"]:CreateToggle({
-        ["Name"] = "Speed",
-        ["Keybind"] = nil,
-        ["Callback"] = function(v)
-            local thing = v
-            if thing then
-                spawn(function()
-                    if matchState == 0 then
-                        createnotification("Speed", "Will enable speed when match started!", 4, true)
-                    end
-                end)
-                repeat wait() 
-                    if (not thing) then 
-                        break 
-                    end
-                until (matchState == 1)
-                if (not thing) then return end
-                if speeddropdown["Value"] == "CFrame" then
-                    if matchState == 1 then
-                        spawn(function()
-                            speed = 23
-                            connectionnn = game:GetService("RunService").Heartbeat:connect(function()
-                                local velo = lplr.Character.Humanoid.MoveDirection * speed
-                                lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                            end)
-                            conectthing = game:GetService("RunService").Stepped:connect(function(time, delta)
-                                if entity.isAlive then
-                                    if (not isnetworkowner(lplr.Character.HumanoidRootPart)) then
-                                        lagbacked = true
-                                    end
-                                    if (isnetworkowner(lplr.Character.HumanoidRootPart)) then
-                                        lagbacked = false
-                                    end
-                                    if speeddropdown["Value"] == "Verus" then conectthing:Disconnect() end
-                                    if lplr.Character.Humanoid.MoveDirection.Magnitude > 0 and isnetworkowner(lplr.Character.HumanoidRootPart) then
-                                        lplr.Character:TranslateBy(lplr.Character.Humanoid.MoveDirection * (lagbacked and speedvalue["Value"] * 3 or speedvalue["Value"] * 5.4) / 10 * delta)
-                                    end
-                                end
-                                task.wait()
-                            end)
-                        end)
-                    end
-                elseif speeddropdown["Value"] == "Verus" then
-                    pcall(function()
-                        if conectthing then conectthing:Disconnect() end
-                    end)
-                    speedverus = 23
-                    connectionnnverus = game:GetService("RunService").Heartbeat:connect(function()
-                        local velo = lplr.Character.Humanoid.MoveDirection * speed
-                        lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
-                    end)
-                    if matchState == 1 then
-                        repeat
-                            if (not thing) then return end
-                            if (speeddropdown["Value"] == "CFrame") then 
-                                connectionnnverus:Disconnect()
-                                return 
-                            end
-                            speed = 23
-                            wait(0.4)
-                            speed = speedvalueverus["Value"]
-                            wait(verusspeeddelay["Value"])
-                        until (not thing)
-                    end
+local speedvalue = {["Value"] = 45}
+local connectionnn
+local conectthing
+local longjumpenabled
+local floatdisab
+local speed
+local speeddropdown = {["Value"] = "CFrame"}
+local speedvalueverus = {["Value"] = 80}
+local verusspeeddelay = {["Value"] = 0.5}
+local speedtog = Tabs["Movement"]:CreateToggle({
+    ["Name"] = "Speed",
+    ["Keybind"] = nil,
+    ["Callback"] = function(v)
+        local thing = v
+        if thing then
+            spawn(function()
+                if matchState == 0 then
+                    createnotification("Speed", "Will enable speed when match started!", 4, true)
                 end
-            else
-                if speeddropdown["Value"] == "CFrame" then
-                    conectthing:Disconnect()
-                    connectionnn:Disconnect()
-                elseif speeddropdown["Value"] == "Verus" then
-                    connectionnnverus:Disconnect()
-                    return
+            end)
+            repeat wait() 
+                if (not thing) then 
+                    break 
+                end
+            until (matchState == 1)
+            if (not thing) then return end
+            if speeddropdown["Value"] == "CFrame" then
+                if matchState == 1 then
+                    spawn(function()
+                        speed = 23
+                        connectionnn = game:GetService("RunService").Heartbeat:connect(function()
+                            local velo = lplr.Character.Humanoid.MoveDirection * speed
+                            lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
+                        end)
+                        conectthing = game:GetService("RunService").Stepped:connect(function(time, delta)
+                            if entity.isAlive then
+                                if (not isnetworkowner(lplr.Character.HumanoidRootPart)) then
+                                    lagbacked = true
+                                end
+                                if (isnetworkowner(lplr.Character.HumanoidRootPart)) then
+                                    lagbacked = false
+                                end
+                                if speeddropdown["Value"] == "Verus" then conectthing:Disconnect() end
+                                if lplr.Character.Humanoid.MoveDirection.Magnitude > 0 and isnetworkowner(lplr.Character.HumanoidRootPart) then
+                                    lplr.Character:TranslateBy(lplr.Character.Humanoid.MoveDirection * (lagbacked and speedvalue["Value"] * 3 or speedvalue["Value"] * 5.4) / 10 * delta)
+                                end
+                            end
+                            task.wait()
+                        end)
+                    end)
+                end
+            elseif speeddropdown["Value"] == "Verus" then
+                pcall(function()
+                    if conectthing then conectthing:Disconnect() end
+                end)
+                speedverus = 23
+                connectionnnverus = game:GetService("RunService").Heartbeat:connect(function()
+                    local velo = lplr.Character.Humanoid.MoveDirection * speed
+                    lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
+                end)
+                if matchState == 1 then
+                    repeat
+                        if (not thing) then return end
+                        if (speeddropdown["Value"] == "CFrame") then 
+                            connectionnnverus:Disconnect()
+                            return 
+                        end
+                        speed = 23
+                        wait(0.4)
+                        speed = speedvalueverus["Value"]
+                        wait(verusspeeddelay["Value"])
+                    until (not thing)
                 end
             end
+        else
+            if speeddropdown["Value"] == "CFrame" then
+                conectthing:Disconnect()
+                connectionnn:Disconnect()
+            elseif speeddropdown["Value"] == "Verus" then
+                connectionnnverus:Disconnect()
+                return
+            end
         end
-    })
-    speedvalue = speedtog:CreateSlider({
-        ["Name"] = "SpeedValue",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 45,
-        ["Default"] = 45,
-        ["Round"] = 0
-    })
-    speeddropdown = speedtog:CreateDropDown({
-        ["Name"] = "SpeedMode",
-        ["Function"] = function() end,
-        ["List"] = {"CFrame", "Verus"},
-        ["Default"] = "CFrame"
-    })
-    speedvalueverus = speedtog:CreateSlider({
-        ["Name"] = "VerusSpeed",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 350,
-        ["Default"] = 80,
-        ["Round"] = 0
-    })
-    verusspeeddelay = speedtog:CreateSlider({
-        ["Name"] = "VerusTicks",
-        ["Function"] = function() end,
-        ["Min"] = 0,
-        ["Max"] = 1,
-        ["Default"] = 0.5,
-        ["Round"] = 1
-    })
-end
+    end
+})
+speedvalue = speedtog:CreateSlider({
+    ["Name"] = "SpeedValue",
+    ["Function"] = function() end,
+    ["Min"] = 0,
+    ["Max"] = 45,
+    ["Default"] = 45,
+    ["Round"] = 0
+})
+speeddropdown = speedtog:CreateDropDown({
+    ["Name"] = "SpeedMode",
+    ["Function"] = function() end,
+    ["List"] = {"CFrame", "Verus"},
+    ["Default"] = "CFrame"
+})
+speedvalueverus = speedtog:CreateSlider({
+    ["Name"] = "VerusSpeed",
+    ["Function"] = function() end,
+    ["Min"] = 0,
+    ["Max"] = 350,
+    ["Default"] = 80,
+    ["Round"] = 0
+})
+verusspeeddelay = speedtog:CreateSlider({
+    ["Name"] = "VerusTicks",
+    ["Function"] = function() end,
+    ["Min"] = 0,
+    ["Max"] = 1,
+    ["Default"] = 0.5,
+    ["Round"] = 1
+})
 
 local sprint = false
 Tabs["Movement"]:CreateToggle({
