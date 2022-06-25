@@ -952,7 +952,7 @@ do
         ["Name"] = "SpeedValue",
         ["Function"] = function() end,
         ["Min"] = 0,
-        ["Max"] = 50,
+        ["Max"] = 45,
         ["Default"] = 45,
         ["Round"] = 0
     })
@@ -1050,30 +1050,20 @@ do
     local longjumpval = false
     local gravityval = {["Value"] = 0}
     local longjumpdelay = {["Value"] = 0.1}
+    local LJSpeed = {["Value"] = 60}
+    local oldthing
     local lognjump = Tabs["Movement"]:CreateToggle({
         ["Name"] = "LongJump",
         ["Keybind"] = nil,
         ["Callback"] = function(v)
             longjumpval = v
             if longjumpval then
+                oldthing = oldthing or speedvalue["Value"]
                 workspace.Gravity = gravityval["Value"]
-                spawn(function()
-                    repeat
-                        if (not longjumpval) then return end
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Climbing)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming)
-                        wait(longjumpdelay["Value"])
-                        lplr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
-                        wait(longjumpdelay["Value"])
-                    until (not longjumpval)
-                end)
+                speedvalue["Value"] = LJSpeed["Value"]
             else
                 workspace.Gravity = 196.19999694824
+                speedvalue["Value"] = oldthing
                 return
             end
         end
@@ -1093,6 +1083,14 @@ do
         ["Max"] = 1,
         ["Default"] = 0.1,
         ["Round"] = 1
+    })
+    LJSpeed = lognjump:CreateSlider({
+        ["Name"] = "Speed",
+        ["Function"] = function() end,
+        ["Min"] = 45,
+        ["Max"] = 80,
+        ["Default"] = 70,
+        ["Round"] = 0
     })
 end
 
