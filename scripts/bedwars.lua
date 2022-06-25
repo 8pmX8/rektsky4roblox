@@ -414,7 +414,9 @@ do
                         task.wait()
                         if (not kauraval) then break end
                         if entity.isAlive then
-                            KillauraRemote()
+                            pcall(function(err)
+                                KillauraRemote()
+                            end)
                         end
                     until (not kauraval)
                 else
@@ -431,39 +433,41 @@ do
                             if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
                                 if v.Team ~= tostring(lplr.Team) then
                                     if killaurafirstpersonanim["Value"] then
-                                        if killauraanimval["Value"] == "Cool" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(autoblockanim) do
-                                                    coolanimlol = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    coolanimlol:Play()
-                                                    task.wait(v.Time - 0.01)
+                                        pcall(function()
+                                            if killauraanimval["Value"] == "Cool" then
+                                                if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                    for i, v in pairs(autoblockanim) do
+                                                        coolanimlol = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                        coolanimlol:Play()
+                                                        task.wait(v.Time - 0.01)
+                                                    end
                                                 end
-                                            end
-                                        elseif killauraanimval["Value"] == "German" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(funnyanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
+                                            elseif killauraanimval["Value"] == "German" then
+                                                if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                    for i, v in pairs(funnyanim) do
+                                                        killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                        killauracurrentanim:Play()
+                                                        task.wait(v.Time - 0.01)
+                                                    end
                                                 end
-                                            end
-                                        elseif killauraanimval["Value"] == "Penis" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(theotherfunnyanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
+                                            elseif killauraanimval["Value"] == "Penis" then
+                                                if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                    for i, v in pairs(theotherfunnyanim) do
+                                                        killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                        killauracurrentanim:Play()
+                                                        task.wait(v.Time - 0.01)
+                                                    end
                                                 end
-                                            end
-                                        elseif killauraanimval["Value"] == "KillMyself" then
-                                            if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
-                                                for i, v in pairs(kmsanim) do
-                                                    killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
-                                                    killauracurrentanim:Play()
-                                                    task.wait(v.Time - 0.01)
+                                            elseif killauraanimval["Value"] == "KillMyself" then
+                                                if entity.isAlive and cam.Viewmodel.RightHand.RightWrist and origC0 then
+                                                    for i, v in pairs(kmsanim) do
+                                                        killauracurrentanim = game:GetService("TweenService"):Create(cam.Viewmodel.RightHand.RightWrist, TweenInfo.new(v.Time), {C0 = origC0 * v.CFrame})
+                                                        killauracurrentanim:Play()
+                                                        task.wait(v.Time - 0.01)
+                                                    end
                                                 end
-                                            end
-                                        end
+                                            end    
+                                        end)
                                     end
                                 end
                             end
@@ -891,10 +895,12 @@ local speedtog = Tabs["Movement"]:CreateToggle({
             if speeddropdown["Value"] == "CFrame" then
                 if matchState == 1 then
                     spawn(function()
-                        speed = 23
-                        connectionnn = game:GetService("RunService").Heartbeat:connect(function()
-                            local velo = lplr.Character.Humanoid.MoveDirection * speed
-                            lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
+                        pcall(function()
+                            speed = 23
+                            connectionnn = game:GetService("RunService").Heartbeat:connect(function()
+                                local velo = lplr.Character.Humanoid.MoveDirection * speed
+                                lplr.Character.HumanoidRootPart.Velocity = Vector3.new(velo.x, lplr.Character.HumanoidRootPart.Velocity.y, velo.z)
+                            end)    
                         end)
                         conectthing = game:GetService("RunService").Stepped:connect(function(time, delta)
                             if entity.isAlive then
