@@ -229,6 +229,7 @@ local kmsanim = {
     {CFrame = CFrame.new(-2.5, -1, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.05}
 }
 
+local InstantKill = {["Value"] = true}
 local rgfejd = false
 function KillauraRemote()
     for i,v in pairs(game.Players:GetChildren()) do
@@ -244,7 +245,7 @@ function KillauraRemote()
                             local Entity = v.Character
                             local target = v.Character:GetPrimaryPartCFrame().Position
                             attackentitycont:CallServer({
-                                ["chargedAttack"] = {["chargeRatio"] = 1},
+                                ["chargedAttack"] = {["chargeRatio"] = InstantKill["Value"] and (0/0) or 1},
                                 ["weapon"] = GBW ~= nil and GBW.tool,
                                 ["entityInstance"] = Entity,
                                 ["validate"] = {["targetPosition"] = {["value"] = target,
@@ -486,6 +487,11 @@ do
     })
     killauraissoundenabled = katog:CreateOptionTog({
         ["Name"] = "Swing Sound",
+        ["Default"] = true,
+        ["Func"] = function() end
+    })
+    InstantKill = katog:CreateOptionTog({
+        ["Name"] = "Instant Kill",
         ["Default"] = true,
         ["Func"] = function() end
     })
