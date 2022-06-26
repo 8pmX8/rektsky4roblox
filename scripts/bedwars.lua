@@ -1061,7 +1061,7 @@ do
     local longjumpval = false
     local gravityval = {["Value"] = 0}
     local longjumpdelay = {["Value"] = 0.1}
-    local LJSpeed = {["Value"] = 60}
+    local LJSpeed = {["Value"] = 100}
     local oldthing
     local lognjump = Tabs["Movement"]:CreateToggle({
         ["Name"] = "LongJump",
@@ -1071,7 +1071,13 @@ do
             if longjumpval then
                 oldthing = oldthing or speedvalue["Value"]
                 workspace.Gravity = gravityval["Value"]
-                speedvalue["Value"] = LJSpeed["Value"]
+                repeat
+                    if (not longjumpval) then break end
+                    speedvalue["Value"] = LJSpeed["Value"]
+                    task.wait(longjumpdelay["Value"])
+                    speedvalue["Value"] = oldthing
+                    task.wait(0.12)
+                until (not longjumpval)
             else
                 workspace.Gravity = 196.19999694824
                 speedvalue["Value"] = oldthing
@@ -1099,7 +1105,7 @@ do
         ["Name"] = "Speed",
         ["Function"] = function() end,
         ["Min"] = 45,
-        ["Max"] = 80,
+        ["Max"] = 120,
         ["Default"] = 70,
         ["Round"] = 0
     })
