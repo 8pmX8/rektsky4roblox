@@ -1,5 +1,18 @@
 repeat task.wait() until game:IsLoaded()
 
+assert(getrawmetatable)
+gmt = getrawmetatable(game)
+setreadonly(gmt, false)
+old = gmt.__namecall
+gmt.__namecall = newcclosure(
+	function(self, ...)
+	local args = {...}
+	if tostring(args[1]) == "RequestStatusUpdate" then
+		return
+	end
+    return old(self, ...)
+end)
+
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
 
 local spawn = function(func) 
