@@ -9,6 +9,30 @@ local lib = {
     ["Objects"] = {}
 }
 
+if isfolder("rektsky") == false then
+    makefolder("rektsky")
+end
+
+if isfolder("rektsky/sound") == false then
+    makefolder("rektsky/sound")
+end
+
+if isfolder("rektsky/sound/mc") == false then
+    makefolder("rektsky/sound/mc")
+end
+
+if isfolder("rektsky/assets") == false then
+    makefolder("rektsky/assets")
+end
+
+if isfolder("rektsky/config") == false then
+    makefolder("rektsky/config")
+end
+
+if isfolder("rektsky/scripts") == false then
+    makefolder("rektsky/scripts")
+end
+
 local sliderapi = {}
 
 local foldername = "rektsky/config"
@@ -140,30 +164,6 @@ local function getcustomassetfuncforsounds(path)
         cachedassetstwo[path] = getasset(path) 
     end
     return cachedassetstwo[path]
-end
-
-if isfolder("rektsky") == false then
-    makefolder("rektsky")
-end
-
-if isfolder("rektsky/sound") == false then
-    makefolder("rektsky/sound")
-end
-
-if isfolder("rektsky/sound/mc") == false then
-    makefolder("rektsky/sound/mc")
-end
-
-if isfolder("rektsky/assets") == false then
-    makefolder("rektsky/assets")
-end
-
-if isfolder("rektsky/config") == false then
-    makefolder("rektsky/config")
-end
-
-if isfolder("rektsky/scripts") == false then
-    makefolder("rektsky/scripts")
 end
 
 function lib:ToggleLib()
