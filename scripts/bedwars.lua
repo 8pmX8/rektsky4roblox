@@ -1,5 +1,18 @@
 repeat task.wait() until game:IsLoaded()
 
+assert(getrawmetatable)
+gmt = getrawmetatable(game)
+setreadonly(gmt, false)
+old = gmt.__namecall
+gmt.__namecall = newcclosure(
+	function(self, ...)
+	local args = {...}
+	if tostring(args[1]) == "RequestStatusUpdate" then
+		return
+	end
+    return old(self, ...)
+end)
+
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
 
 local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
@@ -229,7 +242,6 @@ local kmsanim = {
     {CFrame = CFrame.new(-2.5, -1, -0.02) * CFrame.Angles(math.rad(90), math.rad(0), math.rad(-0)), Time = 0.05}
 }
 
-local InstantKill = {["Value"] = true}
 local rgfejd = false
 function KillauraRemote()
     for i,v in pairs(game.Players:GetChildren()) do
@@ -245,7 +257,7 @@ function KillauraRemote()
                             local Entity = v.Character
                             local target = v.Character:GetPrimaryPartCFrame().Position
                             attackentitycont:CallServer({
-                                ["chargedAttack"] = {["chargeRatio"] = InstantKill["Value"] and (0/0) or 1},
+                                ["chargedAttack"] = {["chargeRatio"] = 1},
                                 ["weapon"] = GBW ~= nil and GBW.tool,
                                 ["entityInstance"] = Entity,
                                 ["validate"] = {["targetPosition"] = {["value"] = target,
@@ -414,7 +426,7 @@ do
                         task.wait()
                         if (not kauraval) then break end
                         if entity.isAlive then
-                            pcall(function(err)
+                            pcall(function()
                                 KillauraRemote()
                             end)
                         end
@@ -491,11 +503,6 @@ do
     })
     killauraissoundenabled = katog:CreateOptionTog({
         ["Name"] = "Swing Sound",
-        ["Default"] = true,
-        ["Func"] = function() end
-    })
-    InstantKill = katog:CreateOptionTog({
-        ["Name"] = "Instant Kill",
         ["Default"] = true,
         ["Func"] = function() end
     })
