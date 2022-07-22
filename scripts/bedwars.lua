@@ -1,18 +1,5 @@
 repeat task.wait() until game:IsLoaded()
 
-assert(getrawmetatable)
-gmt = getrawmetatable(game)
-setreadonly(gmt, false)
-old = gmt.__namecall
-gmt.__namecall = newcclosure(
-	function(self, ...)
-	local args = {...}
-	if tostring(args[1]) == "RequestStatusUpdate" then
-		return
-	end
-    return old(self, ...)
-end)
-
 local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/8pmX8/rektsky4roblox/main/NewRektskyUiLib.lua"))()
 
 local entity = loadstring(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/VapeV4ForRoblox/main/Libraries/entityHandler.lua", true))()
@@ -243,49 +230,6 @@ local kmsanim = {
 }
 
 local rgfejd = false
-function KillauraRemote()
-    for i,v in pairs(game.Players:GetChildren()) do
-        if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
-            local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-            if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
-                if v.Character.Humanoid.Health > 0 then
-                    for k, b in pairs(whiteliststhing) do
-                        if v.UserId ~= tonumber(b) then
-                            rgfejd = true
-                            local GBW = getsword()
-                            local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
-                            local Entity = v.Character
-                            local target = v.Character:GetPrimaryPartCFrame().Position
-                            attackentitycont:CallServer({
-                                ["chargedAttack"] = {["chargeRatio"] = 1},
-                                ["weapon"] = GBW ~= nil and GBW.tool,
-                                ["entityInstance"] = Entity,
-                                ["validate"] = {["targetPosition"] = {["value"] = target,
-                                    ["hash"] = hvFunc(target)},
-                                    ["raycast"] = {
-                                        ["cameraPosition"] = hvFunc(cam.CFrame.Position), 
-                                        ["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
-                                    },
-                                    ["selfPosition"] = {["value"] = selfPosition,
-                                        ["hash"] = hvFunc(selfPosition)
-                                    }
-                                }
-                            })
-                            if killauraissoundenabled["Value"] then
-                                playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
-                            end
-                            if killauraisswingenabled["Value"] then         
-                                playanimation("rbxassetid://4947108314")
-                            end
-                        end
-                    end
-                end
-            else
-                rgfejd = false
-            end
-        end
-    end 
-end
 
 -- targetcheck, isplayertargetable, getallnearesthumanoidtoposition are from vape, i used those for the kill aura anims
 
@@ -427,7 +371,48 @@ do
                         if (not kauraval) then break end
                         if entity.isAlive then
                             pcall(function()
-                                KillauraRemote()
+                                    for i,v in pairs(game.Players:GetChildren()) do
+					if v.Character and v.Name ~= game.Players.LocalPlayer.Name and v.Character:FindFirstChild("HumanoidRootPart") then
+					    local mag = (v.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+					    if mag <= DistVal["Value"] and v.Team ~= game.Players.LocalPlayer.Team and v.Character:FindFirstChild("Humanoid") then
+						if v.Character.Humanoid.Health > 0 then
+						    for k, b in pairs(whiteliststhing) do
+							if v.UserId ~= tonumber(b) then
+							    rgfejd = true
+							    local GBW = getsword()
+							    local selfPosition = lplr.Character.HumanoidRootPart.Position + (DistVal["Value"] > 14 and (lplr.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude > 14 and (CFrame.lookAt(lplr.Character.HumanoidRootPart.Position, v.Character.HumanoidRootPart.Position).lookVector * 4) or Vector3.new(0, 0, 0))
+							    local Entity = v.Character
+							    local target = v.Character:GetPrimaryPartCFrame().Position
+							    attackentitycont:CallServer({
+								["chargedAttack"] = {["chargeRatio"] = 1},
+								["weapon"] = GBW ~= nil and GBW.tool,
+								["entityInstance"] = Entity,
+								["validate"] = {["targetPosition"] = {["value"] = target,
+								    ["hash"] = hvFunc(target)},
+								    ["raycast"] = {
+									["cameraPosition"] = hvFunc(cam.CFrame.Position), 
+									["cursorDirection"] = hvFunc(Ray.new(cam.CFrame.Position, v.Character:GetPrimaryPartCFrame().Position).Unit.Direction)
+								    },
+								    ["selfPosition"] = {["value"] = selfPosition,
+									["hash"] = hvFunc(selfPosition)
+								    }
+								}
+							    })
+							    if killauraissoundenabled["Value"] then
+								playsound("rbxassetid://6760544639", killaurasoundvalue["Value"])
+							    end
+							    if killauraisswingenabled["Value"] then         
+								playanimation("rbxassetid://4947108314")
+							    end
+							    task.wait(3.4)
+							end
+						    end
+						end
+					    else
+						rgfejd = false
+					    end
+					end
+				    end 
                             end)
                         end
                     until (not kauraval)
