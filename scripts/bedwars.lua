@@ -600,7 +600,7 @@ Tabs["Combat"]:CreateToggle({
     end
 })--]]
 
---[[local TPAURAFUNIv2
+local TPAURAFUNIv2
 local tpaurafunihaha
 tpaurafunihaha = Tabs["Combat"]:CreateToggle({
     ["Name"] = "TPAura",
@@ -654,9 +654,8 @@ tpaurafunihaha = Tabs["Combat"]:CreateToggle({
             end)
         end
     end
-})--]]
+})
 
---[[ 
 local ShieldRemote = getremote(debug.getconstants(debug.getprotos(getmetatable(KnitClient.Controllers.ShieldController).raiseShield)[1]))
 local connectionkaurablock
 Tabs["Combat"]:CreateToggle({
@@ -681,7 +680,6 @@ Tabs["Combat"]:CreateToggle({
         end
     end
 })
---]]
 
 do
     local velohorizontal = {["Value"] = 0}
@@ -949,31 +947,23 @@ speedvalue = speedtog:CreateSlider({
     ["Name"] = "SpeedValue",
     ["Function"] = function() end,
     ["Min"] = 0,
-    ["Max"] = 45,
-    ["Default"] = 45,
+    ["Max"] = 23,
+    ["Default"] = 23,
     ["Round"] = 0
 })
 speeddropdown = speedtog:CreateDropDown({
     ["Name"] = "SpeedMode",
     ["Function"] = function() end,
-    ["List"] = {"CFrame", "Verus"},
+    ["List"] = {"CFrame", "Normal"},
     ["Default"] = "CFrame"
 })
 speedvalueverus = speedtog:CreateSlider({
-    ["Name"] = "VerusSpeed",
+    ["Name"] = "Speed",
     ["Function"] = function() end,
     ["Min"] = 0,
     ["Max"] = 350,
     ["Default"] = 80,
     ["Round"] = 0
-})
-verusspeeddelay = speedtog:CreateSlider({
-    ["Name"] = "VerusTicks",
-    ["Function"] = function() end,
-    ["Min"] = 0,
-    ["Max"] = 1,
-    ["Default"] = 0.5,
-    ["Round"] = 1
 })
 
 local sprint = false
@@ -1222,7 +1212,6 @@ end
     })
 ]]
 
---[[
     local flyenabled
     Tabs["Movement"]:CreateToggle({
         ["Name"] = "Fly",
@@ -2011,7 +2000,7 @@ Tabs["Exploits"]:CreateToggle({
     end
 })
 
---[[local breakallbedsthing
+local breakallbedsthing
 breakallbedsthing = Tabs["Exploits"]:CreateToggle({
     ["Name"] = "BreakAllBeds",
     ["Keybind"] = nil,
@@ -2294,7 +2283,6 @@ do
     })
 end
 
---[[
     local hackdetector = false
     Tabs["Rektsky"]:CreateToggle({
         ["Name"] = "HackerDetector",
@@ -2607,7 +2595,7 @@ Tabs["World"]:CreateToggle({
     end
 })
 
---[[Tabs["World"]:CreateToggle({
+Tabs["World"]:CreateToggle({
     ["Name"] = "BedRekterV2",
     ["Keybind"] = nil,
     ["Callback"] = function(v)
@@ -2622,14 +2610,14 @@ Tabs["World"]:CreateToggle({
             end)
         end
     end
-})-]]
+})
 
 Tabs["World"]:CreateToggle({
-    ["Name"] = "LowGravity",
+    ["Name"] = "Low Gravity",
     ["Keybind"] = nil,
     ["Callback"] = function(v)
         if v == true then
-            workspace.Gravity = 10
+            workspace.Gravity = 5
         else
             workspace.Gravity = 196.19999694824
         end
